@@ -30,8 +30,25 @@ export const ToolCallResultSchema = z.object({
 export type ToolCallResult = z.infer<
   typeof ToolCallResultSchema
 >;
+export const ToolRiskClassificationSchema =
+  z.object({
+    toolName: z.string(),
 
+    inferredRisk:
+      RiskLevelSchema,
+
+    finalRisk:
+      RiskLevelSchema,
+
+    overridden: z.boolean(),
+  });
+
+export type ToolRiskClassification =
+  z.infer<
+    typeof ToolRiskClassificationSchema
+  >;
 
 //defines discovered MCP tools ki metadata
 //used by mcp-registery(ofcourse), agent and FE dashboard
+
 

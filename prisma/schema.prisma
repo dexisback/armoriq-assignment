@@ -124,10 +124,16 @@ enum MessageRole {
   TOOL
 }
 
+//new: we are adding a tool risk override. why? so that the user can override the risk level of a file from the dashboard. why? because now we are switching to smart risk level recognition by heuristics and NOT just hardcoded mappings ki bhai {delete_file: HIGH, read_file: LOW} 
 
+model ToolRiskOverride {
+  id String @id @default(cuid())
 
-//basically Rules
-// Approvals
-// Logs
-// Conversations
-//Messages
+  toolName String @unique
+
+  riskLevel RiskLevel
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+    
