@@ -45,3 +45,4 @@ export type PolicyDecision = z.infer<
 >;
 
 //shared policy types, gonna be used by all services. apps/, packages, and our agent
+//defines policy contracts . as in , policyRequest, policyDecision, PolicyTraceStep, PolicyDecisionType

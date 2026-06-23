@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RiskLevelSchema } from "./rule.js";
+import { RiskLevelSchema } from "./rules.js";
 
 export const ToolMetadataSchema = z.object({
   name: z.string(),
@@ -30,3 +30,8 @@ export const ToolCallResultSchema = z.object({
 export type ToolCallResult = z.infer<
   typeof ToolCallResultSchema
 >;
+
+
+//defines discovered MCP tools ki metadata
+//used by mcp-registery(ofcourse), agent and FE dashboard
+

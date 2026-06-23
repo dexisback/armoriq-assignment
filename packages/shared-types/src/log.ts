@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { RiskLevelSchema } from "./rule.js";
+import { RiskLevelSchema } from "./rules.js";
 import { PolicyDecisionTypeSchema } from "./policy.js";
 
 export const ToolExecutionLogSchema = z.object({
@@ -26,3 +26,7 @@ export const ToolExecutionLogSchema = z.object({
 export type ToolExecutionLog = z.infer<
   typeof ToolExecutionLogSchema
 >;
+
+
+//tool execution ka log shape 
+//gonna be used by FE dashboard for visual logs, logger, agent  

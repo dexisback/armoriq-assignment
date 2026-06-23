@@ -82,3 +82,7 @@ export const RuleSchema = z.discriminatedUnion(
 
 export type Rule = z.infer<typeof RuleSchema>;
 //used by policy engine, dashboard and db
+//defines all rule schemas so things like block_tool, require_approval, input_validation, budget_limit, and risk_based
+//also risk lvel and rule
+
+

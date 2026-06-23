@@ -33,3 +33,7 @@ export const ApprovalRequestSchema = z.object({
 export type ApprovalRequest = z.infer<
   typeof ApprovalRequestSchema
 >;
+
+
+//approval queue contracts
+//used by policy-engine , dashboard and agent
