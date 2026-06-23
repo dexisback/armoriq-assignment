@@ -1,0 +1,9 @@
+{
+  "name": "@armoriq/policy-engine",
+  "private": true,
+  "type": "module",
+  "main": "src/engine.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

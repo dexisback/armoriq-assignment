@@ -1,0 +1,9 @@
+{
+  "name": "@armoriq/logger",
+  "private": true,
+  "type": "module",
+  "main": "src/logger.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

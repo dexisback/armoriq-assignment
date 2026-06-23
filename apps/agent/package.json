@@ -1,0 +1,19 @@
+{
+  "name": "@armoriq/agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@armoriq/logger": "workspace:*",
+    "@armoriq/mcp-registry": "workspace:*",
+    "@armoriq/policy-engine": "workspace:*",
+    "@armoriq/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "tsx": "^4.20.5"
+  }
+}

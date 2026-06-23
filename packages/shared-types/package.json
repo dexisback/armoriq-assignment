@@ -1,0 +1,9 @@
+{
+  "name": "@armoriq/shared-types",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}
