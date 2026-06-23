@@ -76,6 +76,9 @@ importers:
       '@armoriq/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(zod@3.25.76)
     devDependencies:
       tsx:
         specifier: ^4.20.5
