@@ -1,8 +1,3 @@
-//load rules -> sort the rules by priority -> call evaluator -> build the final decision -> return PolicyDecision 
-//everything eventually calls policyEngine.evaluate()
-//why? because the agent never actually talks to the evaluator, or the rule-matcher, or etc etc. it only talks to one (this ) service (policyEngine.evaluate(data)), and gets back the policyDecision
-
-
 import type {
   PolicyDecision,
   PolicyRequest,
@@ -25,12 +20,9 @@ import {
 } from "./evaluator.js";
 
 export class PolicyEngine {
-  constructor(
-    private readonly rules: Rule[]
-  ) {}
-
   async evaluate(
     request: PolicyRequest,
+    rules: Rule[],
     options?: {
       currentTokens?: number;
       riskLevel?: RiskLevel;
@@ -44,7 +36,7 @@ export class PolicyEngine {
     const riskLevel =
       options?.riskLevel;
 
-    for (const rule of this.rules) {
+    for (const rule of rules) {
       switch (rule.type) {
         case RuleTypeSchema.enum.BLOCK_TOOL: {
           const result =
@@ -54,9 +46,7 @@ export class PolicyEngine {
               trace
             );
 
-          if (result) {
-            return result;
-          }
+          if (result) return result;
 
           break;
         }
@@ -69,9 +59,7 @@ export class PolicyEngine {
               trace
             );
 
-          if (result) {
-            return result;
-          }
+          if (result) return result;
 
           break;
         }
@@ -84,9 +72,7 @@ export class PolicyEngine {
               trace
             );
 
-          if (result) {
-            return result;
-          }
+          if (result) return result;
 
           break;
         }
@@ -99,9 +85,7 @@ export class PolicyEngine {
               trace
             );
 
-          if (result) {
-            return result;
-          }
+          if (result) return result;
 
           break;
         }
@@ -114,9 +98,7 @@ export class PolicyEngine {
               trace
             );
 
-          if (result) {
-            return result;
-          }
+          if (result) return result;
 
           break;
         }
@@ -133,5 +115,14 @@ export class PolicyEngine {
   }
 }
 
+export const policyEngine =
+  new PolicyEngine();
 
 
+
+  //policy engine is now stateless - earlier you'd haveto call 
+  //new PolicyEngine(rules)
+  //now none of that sh
+  //policyEngine.evaluate(request, rules, optional)
+  //rules automatically keep on coming from ruleCache.getRules()
+  

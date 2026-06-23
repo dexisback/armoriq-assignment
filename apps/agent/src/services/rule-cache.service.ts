@@ -1,6 +1,20 @@
-//with this we will load rules from db, subscribe to redis pub/sub and then store the tools in memory   
-//policy engine basically becomes policyEngine.evaluate(
-//  request,
-//  ruleCache.getRules()
-// )
+import type { Rule } from "@armoriq/shared-types";
 
+export class RuleCacheService {
+  private rules: Rule[] = [];
+
+  getRules() {
+    return this.rules;
+  }
+
+  setRules(rules: Rule[]) {
+    this.rules = rules;
+  }
+
+  clear() {
+    this.rules = [];
+  }
+}
+
+export const ruleCache =
+  new RuleCacheService();

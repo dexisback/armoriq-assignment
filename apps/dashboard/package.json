@@ -1,5 +1,5 @@
 {
-  "name": "@armoriq/agent",
+  "name": "@armoriq/dashboard",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,10 +7,6 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@armoriq/logger": "workspace:*",
-    "@armoriq/mcp-registry": "workspace:*",
-    "@armoriq/policy-engine": "workspace:*",
-    "@armoriq/shared-types": "workspace:*",
     "ioredis": "^5.11.1"
   },
   "devDependencies": {
