@@ -137,3 +137,26 @@ model ToolRiskOverride {
   updatedAt DateTime @updatedAt
 }
     
+
+
+//toolcatalog persists discovered tools 
+
+model ToolCatalog {
+  id String @id @default(cuid())
+
+  toolName String @unique
+
+  description String
+
+  serverId String
+
+  inferredRisk RiskLevel
+
+  finalRisk RiskLevel
+
+  lastSeenAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
