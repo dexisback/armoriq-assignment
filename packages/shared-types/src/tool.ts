@@ -1,23 +1,32 @@
-import { RiskLevel } from "./rule.js";
+import { z } from "zod";
+import { RiskLevelSchema } from "./rule.js";
 
-export type ToolMetadata = {
-  name: string;
-  description: string;
-  serverId: string;
-  riskLevel: RiskLevel;
-};
+export const ToolMetadataSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  serverId: z.string(),
+  riskLevel: RiskLevelSchema,
+});
 
-export type ToolCallRequest = {
-  toolName: string;
-  args: Record<string, unknown>;
-};
+export type ToolMetadata = z.infer<
+  typeof ToolMetadataSchema
+>;
 
-export type ToolCallResult = {
-  success: boolean;
-  content: unknown;
-  error?: string;
-};
+export const ToolCallRequestSchema = z.object({
+  toolName: z.string(),
+  args: z.record(z.string(), z.unknown()),
+});
 
+export type ToolCallRequest = z.infer<
+  typeof ToolCallRequestSchema
+>;
 
+export const ToolCallResultSchema = z.object({
+  success: z.boolean(),
+  content: z.unknown(),
+  error: z.string().optional(),
+});
 
-
+export type ToolCallResult = z.infer<
+  typeof ToolCallResultSchema
+>;

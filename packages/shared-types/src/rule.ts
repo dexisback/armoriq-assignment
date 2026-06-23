@@ -1,52 +1,64 @@
-export enum RuleType {
-  BLOCK_TOOL = "BLOCK_TOOL",
-  REQUIRE_APPROVAL = "REQUIRE_APPROVAL",
-  INPUT_VALIDATION = "INPUT_VALIDATION",
-  BUDGET_LIMIT = "BUDGET_LIMIT",
-  RISK_BASED = "RISK_BASED",
-}
+import { z } from "zod";
 
-export enum RiskLevel {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-  CRITICAL = "CRITICAL",
-}
+export const RuleTypeSchema = z.enum([
+  "BLOCK_TOOL",
+  "REQUIRE_APPROVAL",
+  "INPUT_VALIDATION",
+  "BUDGET_LIMIT",
+  "RISK_BASED",
+]);
 
-export type BlockToolRule = {
-  type: RuleType.BLOCK_TOOL;
-  toolName: string;
-};
+export type RuleType = z.infer<
+  typeof RuleTypeSchema
+>;
 
-export type ApprovalRule = {
-  type: RuleType.REQUIRE_APPROVAL;
-  toolName: string;
-};
+export const RiskLevelSchema = z.enum([
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+  "CRITICAL",
+]);
 
-export type InputValidationRule = {
-  type: RuleType.INPUT_VALIDATION;
-  toolName: string;
-  allowedPrefix: string;
-};
+export type RiskLevel = z.infer<
+  typeof RiskLevelSchema
+>;
 
-export type BudgetRule = {
-  type: RuleType.BUDGET_LIMIT;
-  maxTokens: number;
-};
+export const BlockToolRuleSchema = z.object({
+  type: z.literal("BLOCK_TOOL"),
+  toolName: z.string(),
+});
 
-export type RiskBasedRule = {
-  type: RuleType.RISK_BASED;
-  riskLevel: RiskLevel;
-};
+export const ApprovalRuleSchema = z.object({
+  type: z.literal("REQUIRE_APPROVAL"),
+  toolName: z.string(),
+});
 
-export type Rule =
-  | BlockToolRule
-  | ApprovalRule
-  | InputValidationRule
-  | BudgetRule
-  | RiskBasedRule;
+export const InputValidationRuleSchema = z.object({
+  type: z.literal("INPUT_VALIDATION"),
+  toolName: z.string(),
+  allowedPrefix: z.string(),
+});
 
+export const BudgetRuleSchema = z.object({
+  type: z.literal("BUDGET_LIMIT"),
+  maxTokens: z.number().positive(),
+});
 
+export const RiskBasedRuleSchema = z.object({
+  type: z.literal("RISK_BASED"),
+  riskLevel: RiskLevelSchema,
+});
 
+export const RuleSchema = z.discriminatedUnion(
+  "type",
+  [
+    BlockToolRuleSchema,
+    ApprovalRuleSchema,
+    InputValidationRuleSchema,
+    BudgetRuleSchema,
+    RiskBasedRuleSchema,
+  ]
+);
 
+export type Rule = z.infer<typeof RuleSchema>;
 //used by policy engine, dashboard and db

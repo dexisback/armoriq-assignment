@@ -1,25 +1,28 @@
-import { PolicyDecisionType } from "./policy.js";
-import { RiskLevel } from "./rule.js";
+import { z } from "zod";
 
-export type ToolExecutionLog = {
-  id: string;
+import { RiskLevelSchema } from "./rule.js";
+import { PolicyDecisionTypeSchema } from "./policy.js";
 
-  conversationId?: string;
+export const ToolExecutionLogSchema = z.object({
+  id: z.string(),
 
-  toolName: string;
+  conversationId: z.string().optional(),
 
-  riskLevel?: RiskLevel;
+  toolName: z.string(),
 
-  decision: PolicyDecisionType;
+  riskLevel: RiskLevelSchema.optional(),
 
-  reason?: string;
+  decision: PolicyDecisionTypeSchema,
 
-  trace?: unknown[];
+  reason: z.string().optional(),
 
-  executed: boolean;
+  trace: z.array(z.unknown()).optional(),
 
-  timestamp: Date;
-};
+  executed: z.boolean(),
 
+  timestamp: z.date(),
+});
 
-//logger, dashboard, policy engine, agent
+export type ToolExecutionLog = z.infer<
+  typeof ToolExecutionLogSchema
+>;

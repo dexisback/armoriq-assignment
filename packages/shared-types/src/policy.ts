@@ -1,31 +1,47 @@
-export enum PolicyDecisionType {
-  ALLOW = "ALLOW",
-  DENY = "DENY",
-  REQUIRE_APPROVAL = "REQUIRE_APPROVAL",
-  VALIDATION_FAILED = "VALIDATION_FAILED",
-  BUDGET_EXCEEDED = "BUDGET_EXCEEDED",
-  ERROR = "ERROR",
-}
+import { z } from "zod";
 
-export type PolicyRequest = {
-  conversationId: string;
-  toolName: string;
-  args: Record<string, unknown>;
-};
+export const PolicyDecisionTypeSchema = z.enum([
+  "ALLOW",
+  "DENY",
+  "REQUIRE_APPROVAL",
+  "VALIDATION_FAILED",
+  "BUDGET_EXCEEDED",
+  "ERROR",
+]);
 
-export type PolicyTraceStep = {
-  rule: string;
-  matched: boolean;
-  message: string;
-};
+export type PolicyDecisionType = z.infer<
+  typeof PolicyDecisionTypeSchema
+>;
 
-export type PolicyDecision = {
-  decision: PolicyDecisionType;
-  reason?: string;
-  trace?: PolicyTraceStep[];
-  approvalId?: string;
-};
+export const PolicyRequestSchema = z.object({
+  conversationId: z.string(),
+  toolName: z.string(),
+  args: z.record(z.string(), z.unknown()),
+});
 
+export type PolicyRequest = z.infer<
+  typeof PolicyRequestSchema
+>;
 
+export const PolicyTraceStepSchema = z.object({
+  rule: z.string(),
+  matched: z.boolean(),
+  message: z.string(),
+});
+
+export type PolicyTraceStep = z.infer<
+  typeof PolicyTraceStepSchema
+>;
+
+export const PolicyDecisionSchema = z.object({
+  decision: PolicyDecisionTypeSchema,
+  reason: z.string().optional(),
+  approvalId: z.string().optional(),
+  trace: z.array(PolicyTraceStepSchema).optional(),
+});
+
+export type PolicyDecision = z.infer<
+  typeof PolicyDecisionSchema
+>;
 
 //shared policy types, gonna be used by all services. apps/, packages, and our agent

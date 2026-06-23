@@ -1,22 +1,35 @@
-export enum ApprovalStatus {
-  PENDING = "PENDING",
-  APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
-  EXPIRED = "EXPIRED",
-}
+import { z } from "zod";
 
-export type ApprovalRequest = {
-  id: string;
+export const ApprovalStatusSchema = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "EXPIRED",
+]);
 
-  toolName: string;
+export type ApprovalStatus = z.infer<
+  typeof ApprovalStatusSchema
+>;
 
-  arguments: Record<string, unknown>;
+export const ApprovalRequestSchema = z.object({
+  id: z.string(),
 
-  status: ApprovalStatus;
+  toolName: z.string(),
 
-  requestedAt: Date;
+  arguments: z.record(
+    z.string(),
+    z.unknown()
+  ),
 
-  resolvedAt?: Date;
+  status: ApprovalStatusSchema,
 
-  resolutionReason?: string;
-};
+  requestedAt: z.date(),
+
+  resolvedAt: z.date().optional(),
+
+  resolutionReason: z.string().optional(),
+});
+
+export type ApprovalRequest = z.infer<
+  typeof ApprovalRequestSchema
+>;
