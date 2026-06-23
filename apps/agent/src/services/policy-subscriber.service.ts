@@ -3,7 +3,7 @@ import { Redis } from "ioredis";
 import { loadRules } from "./rule-loader.service.js";
 
 const subscriber = new Redis(
-  process.env.REDIS_URL
+  process.env.REDIS_URL!
 );
 
 export async function startPolicySubscriber() {

@@ -1,0 +1,1 @@
+//mandatory health endpoint ritual

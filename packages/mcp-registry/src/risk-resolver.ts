@@ -1,40 +1,40 @@
-//this checks db override (which a dashboard would do in future) , otherwise use the auto inferred risk
-import { prisma } from "@armoriq/db";
+import type {
+  RiskLevel,
+  ToolRiskClassification,
+} from "@armoriq/shared-types";
 
-import { inferRisk } from "./risk-classifier.js";
+import { prisma } from "@armoriq/db";
 
 export async function resolveRisk(
   toolName: string,
-  description: string
-) {
+  inferredRisk: RiskLevel
+): Promise<ToolRiskClassification> {
   const override =
-    await prisma.toolRiskOverride.findUnique(
-      {
-        where: {
-          toolName,
-        },
-      }
-    );
-
-  const inferredRisk =
-    inferRisk(
-      toolName,
-      description
-    );
+    await prisma.toolRiskOverride.findUnique({
+      where: {
+        toolName,
+      },
+    });
 
   if (!override) {
     return {
+      toolName,
+
       inferredRisk,
-      finalRisk:
-        inferredRisk,
+
+      finalRisk: inferredRisk,
+
       overridden: false,
     };
   }
 
   return {
+    toolName,
+
     inferredRisk,
-    finalRisk:
-      override.riskLevel,
+
+    finalRisk: override.riskLevel,
+
     overridden: true,
   };
 }

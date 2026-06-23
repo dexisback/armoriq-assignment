@@ -1,0 +1,75 @@
+//connects to MCP servers
+//runs tools/list, builds discoveredTools() , adds risk level , persists with building toolCatalog, returns tool to registry
+
+
+
+import type {
+  DiscoveredTool,
+  MCPServerConfig,
+} from "@armoriq/shared-types";
+
+import {
+  SSEClientTransport,
+} from "@modelcontextprotocol/sdk/client/sse.js";
+
+import {
+  StdioClientTransport,
+} from "@modelcontextprotocol/sdk/client/stdio.js";
+
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+
+import { inferRisk } from "./risk-classifier.js";
+
+export async function discoverTools(
+  server: MCPServerConfig
+): Promise<DiscoveredTool[]> {
+  const client = new Client(
+    {
+      name: "armoriq-agent",
+      version: "1.0.0",
+    }
+  );
+
+  if (server.transport === "stdio") {
+    const transport =
+      new StdioClientTransport({
+        command: server.command!,
+        args: server.args ?? [],
+      });
+
+    await client.connect(
+      transport
+    );
+  } else {
+    const transport =
+      new SSEClientTransport(
+        new URL(server.url!)
+      );
+
+    await client.connect(
+      transport
+    );
+  }
+
+  const response =
+    await client.listTools();
+
+  return response.tools.map(
+    tool => ({
+      name: tool.name,
+
+      description:
+        tool.description ?? "",
+
+      serverId: server.id,
+
+      inputSchema:
+        tool.inputSchema,
+
+      riskLevel: inferRisk(
+        tool.name,
+        tool.description ?? ""
+      ),
+    })
+  );
+}
