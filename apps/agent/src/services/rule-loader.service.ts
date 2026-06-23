@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma.js";
+import { prisma } from "@armoriq/db"
 import { ruleCache } from "./rule-cache.service.js";
 
 export async function loadRules() {
