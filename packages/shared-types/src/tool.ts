@@ -50,6 +50,24 @@ export type ToolRiskClassification =
 
 //defines discovered MCP tools ki metadata
 //used by mcp-registery(ofcourse), agent and FE dashboard
+export const ToolCatalogEntrySchema =
+  z.object({
+    toolName: z.string(),
 
+    description: z.string(),
+
+    serverId: z.string(),
+
+    inferredRisk:
+      RiskLevelSchema,
+
+    finalRisk:
+      RiskLevelSchema,
+  });
+
+export type ToolCatalogEntry =
+  z.infer<
+    typeof ToolCatalogEntrySchema
+  >;
 
 
