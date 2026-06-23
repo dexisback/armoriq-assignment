@@ -6,9 +6,3 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
-model SeedRecord {
-  id        String   @id @default(cuid())
-  label     String
-  createdAt DateTime @default(now())
-}

@@ -384,7 +384,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  SeedRecord: 'SeedRecord'
+
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -400,85 +400,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "seedRecord"
+    modelProps: never
     txIsolationLevel: TransactionIsolationLevel
   }
-  model: {
-    SeedRecord: {
-      payload: Prisma.$SeedRecordPayload<ExtArgs>
-      fields: Prisma.SeedRecordFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.SeedRecordFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.SeedRecordFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        findFirst: {
-          args: Prisma.SeedRecordFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.SeedRecordFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        findMany: {
-          args: Prisma.SeedRecordFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>[]
-        }
-        create: {
-          args: Prisma.SeedRecordCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        createMany: {
-          args: Prisma.SeedRecordCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.SeedRecordCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>[]
-        }
-        delete: {
-          args: Prisma.SeedRecordDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        update: {
-          args: Prisma.SeedRecordUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        deleteMany: {
-          args: Prisma.SeedRecordDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.SeedRecordUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.SeedRecordUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>[]
-        }
-        upsert: {
-          args: Prisma.SeedRecordUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SeedRecordPayload>
-        }
-        aggregate: {
-          args: Prisma.SeedRecordAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSeedRecord>
-        }
-        groupBy: {
-          args: Prisma.SeedRecordGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SeedRecordGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.SeedRecordCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SeedRecordCountAggregateOutputType> | number
-        }
-      }
-    }
-  }
+  model: {}
 } & {
   other: {
     payload: any
@@ -517,77 +442,7 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const SeedRecordScalarFieldEnum = {
-  id: 'id',
-  label: 'label',
-  createdAt: 'createdAt'
-} as const
 
-export type SeedRecordScalarFieldEnum = (typeof SeedRecordScalarFieldEnum)[keyof typeof SeedRecordScalarFieldEnum]
-
-
-export const SortOrder = {
-  asc: 'asc',
-  desc: 'desc'
-} as const
-
-export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-
-/**
- * Field references
- */
-
-
-/**
- * Reference to a field of type 'String'
- */
-export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
-    
-
-
-/**
- * Reference to a field of type 'String[]'
- */
-export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
 
 /**
  * Batch Payload for updateMany & deleteMany & createMany
@@ -698,9 +553,7 @@ export type PrismaClientOptions = ({
    */
   queryPlanCacheMaxSize?: number
 }
-export type GlobalOmitConfig = {
-  seedRecord?: Prisma.SeedRecordOmit
-}
+export type GlobalOmitConfig = {}
 
 /* Types for Logging */
 export type LogLevel = 'info' | 'query' | 'warn' | 'error'

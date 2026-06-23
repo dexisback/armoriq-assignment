@@ -8,5 +8,4 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/SeedRecord.js'
 export type * from './commonInputTypes.js'

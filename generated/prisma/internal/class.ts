@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.8.0",
   "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel SeedRecord {\n  id        String   @id @default(cuid())\n  label     String\n  createdAt DateTime @default(now())\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -32,10 +32,10 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"SeedRecord\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"label\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{},\"enums\":{},\"types\":{}}")
 config.parameterizationSchema = {
-  strings: JSON.parse("[\"where\",\"SeedRecord.findUnique\",\"SeedRecord.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"SeedRecord.findFirst\",\"SeedRecord.findFirstOrThrow\",\"SeedRecord.findMany\",\"data\",\"SeedRecord.createOne\",\"SeedRecord.createMany\",\"SeedRecord.createManyAndReturn\",\"SeedRecord.updateOne\",\"SeedRecord.updateMany\",\"SeedRecord.updateManyAndReturn\",\"create\",\"update\",\"SeedRecord.upsertOne\",\"SeedRecord.deleteOne\",\"SeedRecord.deleteMany\",\"having\",\"_count\",\"_min\",\"_max\",\"SeedRecord.groupBy\",\"SeedRecord.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"label\",\"createdAt\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"set\"]"),
-  graph: "KQkQBhoAACIAMBsAAAQAEBwAACIAMB0BAAAAAR4BACMAIR9AACQAIQEAAAABACABAAAAAQAgBhoAACIAMBsAAAQAEBwAACIAMB0BACMAIR4BACMAIR9AACQAIQADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACADHQEAAAABHgEAAAABH0AAAAABAQgAAAkAIAMdAQAAAAEeAQAAAAEfQAAAAAEBCAAACwAwAQgAAAsAMAMdAQAoACEeAQAoACEfQAApACECAAAAAQAgCAAADgAgAx0BACgAIR4BACgAIR9AACkAIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgAxUAACUAIBYAACcAIBcAACYAIAYaAAAaADAbAAAXABAcAAAaADAdAQAbACEeAQAbACEfQAAcACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIAYaAAAaADAbAAAXABAcAAAaADAdAQAbACEeAQAbACEfQAAcACEOFQAAHgAgFgAAIQAgFwAAIQAgIAEAAAABIQEAAAAEIgEAAAAEIwEAAAABJAEAAAABJQEAAAABJgEAAAABJwEAIAAhKAEAAAABKQEAAAABKgEAAAABCxUAAB4AIBYAAB8AIBcAAB8AICBAAAAAASFAAAAABCJAAAAABCNAAAAAASRAAAAAASVAAAAAASZAAAAAASdAAB0AIQsVAAAeACAWAAAfACAXAAAfACAgQAAAAAEhQAAAAAQiQAAAAAQjQAAAAAEkQAAAAAElQAAAAAEmQAAAAAEnQAAdACEIIAIAAAABIQIAAAAEIgIAAAAEIwIAAAABJAIAAAABJQIAAAABJgIAAAABJwIAHgAhCCBAAAAAASFAAAAABCJAAAAABCNAAAAAASRAAAAAASVAAAAAASZAAAAAASdAAB8AIQ4VAAAeACAWAAAhACAXAAAhACAgAQAAAAEhAQAAAAQiAQAAAAQjAQAAAAEkAQAAAAElAQAAAAEmAQAAAAEnAQAgACEoAQAAAAEpAQAAAAEqAQAAAAELIAEAAAABIQEAAAAEIgEAAAAEIwEAAAABJAEAAAABJQEAAAABJgEAAAABJwEAIQAhKAEAAAABKQEAAAABKgEAAAABBhoAACIAMBsAAAQAEBwAACIAMB0BACMAIR4BACMAIR9AACQAIQsgAQAAAAEhAQAAAAQiAQAAAAQjAQAAAAEkAQAAAAElAQAAAAEmAQAAAAEnAQAhACEoAQAAAAEpAQAAAAEqAQAAAAEIIEAAAAABIUAAAAAEIkAAAAAEI0AAAAABJEAAAAABJUAAAAABJkAAAAABJ0AAHwAhAAAAASsBAAAAAQErQAAAAAEAAAAAAxUABhYABxcACAAAAAMVAAYWAAcXAAgBAgECAwEFBgEGBwEHCAEJCgEKDAILDQMMDwENEQIOEgQREwESFAETFQIYGAUZGQk"
+  strings: JSON.parse("[]"),
+  graph: "AAAA"
 }
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
@@ -70,8 +70,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more SeedRecords
-   * const seedRecords = await prisma.seedRecord.findMany()
+   * // Fetch zero or more Users
+   * const users = await prisma.user.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -94,8 +94,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more SeedRecords
- * const seedRecords = await prisma.seedRecord.findMany()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -188,15 +188,7 @@ export interface PrismaClient<
     extArgs: ExtArgs
   }>>
 
-      /**
-   * `prisma.seedRecord`: Exposes CRUD operations for the **SeedRecord** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more SeedRecords
-    * const seedRecords = await prisma.seedRecord.findMany()
-    * ```
-    */
-  get seedRecord(): Prisma.SeedRecordDelegate<ExtArgs, { omit: OmitOpts }>;
+    
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {
