@@ -1,9 +1,15 @@
 {
   "name": "@armoriq/policy-engine",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "src/engine.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@armoriq/shared-types": "workspace:*"
   }
 }

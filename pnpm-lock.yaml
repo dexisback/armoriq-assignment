@@ -77,11 +77,23 @@ importers:
 
   packages/logger: {}
 
-  packages/mcp-registry: {}
+  packages/mcp-registry:
+    dependencies:
+      '@armoriq/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
-  packages/policy-engine: {}
+  packages/policy-engine:
+    dependencies:
+      '@armoriq/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
-  packages/shared-types: {}
+  packages/shared-types:
+    dependencies:
+      zod:
+        specifier: ^3.24.4
+        version: 3.25.76
 
 packages:
 

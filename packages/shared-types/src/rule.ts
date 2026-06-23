@@ -49,6 +49,26 @@ export const RiskBasedRuleSchema = z.object({
   riskLevel: RiskLevelSchema,
 });
 
+export type BlockToolRule = z.infer<
+  typeof BlockToolRuleSchema
+>;
+
+export type ApprovalRule = z.infer<
+  typeof ApprovalRuleSchema
+>;
+
+export type InputValidationRule = z.infer<
+  typeof InputValidationRuleSchema
+>;
+
+export type BudgetRule = z.infer<
+  typeof BudgetRuleSchema
+>;
+
+export type RiskBasedRule = z.infer<
+  typeof RiskBasedRuleSchema
+>;
+
 export const RuleSchema = z.discriminatedUnion(
   "type",
   [

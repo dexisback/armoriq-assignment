@@ -1,0 +1,19 @@
+import type {
+  InputValidationRule,
+  PolicyRequest,
+} from "@armoriq/shared-types";
+
+export function matchesInputValidationRule(
+  rule: InputValidationRule,
+  request: PolicyRequest
+) {
+  const path = request.args.path;
+
+  if (typeof path !== "string") {
+    return false;
+  }
+
+  return path.startsWith(
+    rule.allowedPrefix
+  );
+}

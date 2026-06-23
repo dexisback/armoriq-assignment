@@ -6,3 +6,128 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum RuleType {
+  BLOCK_TOOL
+  REQUIRE_APPROVAL
+  INPUT_VALIDATION
+  BUDGET_LIMIT
+  RISK_BASED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum PolicyDecisionType {
+  ALLOW
+  DENY
+  REQUIRE_APPROVAL
+  VALIDATION_FAILED
+  BUDGET_EXCEEDED
+  ERROR
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Rule {
+  id          String   @id @default(cuid())
+
+  name        String
+  description String?
+
+  type        RuleType
+
+  enabled     Boolean  @default(true)
+
+  config      Json
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Approval {
+  id String @id @default(cuid())
+
+  toolName String
+
+  arguments Json
+
+  status ApprovalStatus
+
+  requestedAt DateTime @default(now())
+
+  resolvedAt DateTime?
+
+  resolutionReason String?
+
+  createdAt DateTime @default(now())
+}
+
+model ToolExecutionLog {
+  id String @id @default(cuid())
+
+  conversationId String?
+
+  toolName String
+
+  riskLevel RiskLevel?
+
+  arguments Json
+
+  decision PolicyDecisionType
+
+  reason String?
+
+  trace Json?
+
+  executed Boolean
+
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id String @id @default(cuid())
+
+  totalTokens Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  messages Message[]
+}
+
+model Message {
+  id String @id @default(cuid())
+
+  conversationId String
+
+  role MessageRole
+
+  content String @db.Text
+
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  TOOL
+}
+
+
+
+//basically Rules
+// Approvals
+// Logs
+// Conversations
+//Messages
