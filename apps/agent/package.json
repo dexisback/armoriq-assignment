@@ -11,6 +11,7 @@
     "@armoriq/mcp-registry": "workspace:*",
     "@armoriq/policy-engine": "workspace:*",
     "@armoriq/shared-types": "workspace:*",
+    "@google/genai": "^2.9.0",
     "@upstash/redis": "^1.38.0",
     "ioredis": "^5.11.1"
   },
