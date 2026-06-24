@@ -1,28 +1,118 @@
 import { gemini } from "../../lib/gemini.js";
-import { DEFAULT_MODEL } from "../../lib/models.js";
+import { groq } from "../../lib/groq.js";
+import { MODELS } from "../../lib/models.js";
+
+async function retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) {
+      throw error;
+    }
+    console.warn(`Groq request failed, retrying in ${delay}ms...`, error);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 2);
+  }
+}
 
 export class ChatService {
   async generate(
     prompt: string,
     tools?: unknown[]
   ) {
-    const config: any = {};
-    if (tools) {
-      config.tools = tools;
-    }
+    try {
+      const config: any = {};
+      if (tools) {
+        config.tools = JSON.parse(JSON.stringify(tools));
+      }
 
-    const response =
-      await gemini.models.generateContent({
-        model: DEFAULT_MODEL,
-
+      const response = await gemini.models.generateContent({
+        model: MODELS.GEMINI,
         contents: prompt,
-
         config,
       });
 
-    return response;
+      return response;
+    } catch (geminiError: any) {
+      console.warn("Gemini call failed. Falling back to Groq...", geminiError.message || geminiError);
+
+      const lowercaseSchemaTypes = (schema: any): any => {
+        if (!schema || typeof schema !== "object") {
+          return schema;
+        }
+        const result = Array.isArray(schema) ? [] : {};
+        for (const key of Object.keys(schema)) {
+          if (key === "type" && typeof schema[key] === "string") {
+            (result as any)[key] = schema[key].toLowerCase();
+          } else {
+            (result as any)[key] = lowercaseSchemaTypes(schema[key]);
+          }
+        }
+        return result;
+      };
+
+      const declarations = (tools as any)?.[0]?.functionDeclarations ?? [];
+      const groqTools = declarations.map((decl: any) => ({
+        type: "function",
+        function: {
+          name: decl.name,
+          description: decl.description,
+          parameters: lowercaseSchemaTypes(decl.parameters),
+        }
+      }));
+
+      const groqParams: any = {
+        model: MODELS.GROQ,
+        messages: [
+          { role: "user", content: prompt }
+        ],
+      };
+
+      if (groqTools.length > 0) {
+        groqParams.tools = groqTools;
+      }
+
+      console.error("GROQ PARAMS TOOLS:", JSON.stringify(groqParams.tools, null, 2));
+
+      const completion = await retryWithBackoff(async () => {
+        return await groq.chat.completions.create(groqParams);
+      });
+
+      const choice = completion.choices?.[0];
+      const message = choice?.message;
+      const parts: any[] = [];
+
+      if (message?.content) {
+        parts.push({ text: message.content });
+      }
+
+      if (message?.tool_calls) {
+        for (const tc of message.tool_calls) {
+          parts.push({
+            functionCall: {
+              name: tc.function.name,
+              args: JSON.parse(tc.function.arguments || "{}"),
+            }
+          });
+        }
+      }
+
+      const geminiResponse = {
+        candidates: [
+          {
+            content: {
+              parts,
+            }
+          }
+        ],
+        get text() {
+          return message?.content || "";
+        }
+      };
+
+      return geminiResponse as any;
+    }
   }
 }
 
-export const chatService =
-  new ChatService();
+export const chatService = new ChatService();

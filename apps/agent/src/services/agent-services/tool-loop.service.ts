@@ -39,7 +39,7 @@ export class ToolLoopService {
 
       const toolCall =
         parts.find(
-          part =>
+          (part: any) =>
             "functionCall" in part
         );
 
@@ -104,15 +104,10 @@ export class ToolLoopService {
       response =
         await chatService.generate(
           `
-Tool Result:
+Based on the following tool execution result, write a final response to the user. Do NOT call any more tools.
 
-${JSON.stringify(
-  toolResult
-)}
-
-Original User Prompt:
-
-${prompt}
+User Prompt: ${prompt}
+Tool Result: ${JSON.stringify(toolResult)}
           `,
           geminiTools
         );

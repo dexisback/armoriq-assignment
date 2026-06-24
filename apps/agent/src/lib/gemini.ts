@@ -1,19 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv"
+// gemini.ts
 
+import dotenv from "dotenv";
+import { GoogleGenAI } from "@google/genai";
 
 dotenv.config({
-    path: "../../.env",
-})
-
-
-
-const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY missing");
-}
+  path: "../../.env",
+});
 
 export const gemini = new GoogleGenAI({
-  apiKey,
+  apiKey: process.env.GEMINI_API_KEY!,
 });
+
+

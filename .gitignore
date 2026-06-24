@@ -1,9 +1,4 @@
 .env
-node_modules
-
-generated/*
-
+node_modules/
+dist/
 generated/
-
-dist/*
-

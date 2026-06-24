@@ -21,7 +21,7 @@ export class ToolAdapterService {
               tool.description,
 
             parameters:
-              tool.inputSchema,
+              JSON.parse(JSON.stringify(tool.inputSchema)),
           })),
       },
     ];
