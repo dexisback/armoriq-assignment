@@ -1,16 +1,22 @@
-import { bootstrap } from "./bootstrap/index.js";
+import "dotenv/config";
 
-import { toolLoopService } from "./services/agent-services/tool-loop.service.js";
+import { bootstrap } from "./bootstrap/index.js";
+import { createServer } from "./api/server.js";
 
 async function main() {
   await bootstrap();
 
-  const response =
-    await toolLoopService.run(
-      "List all servers"
-    );
+  const app =
+    createServer();
 
-  console.log(response);
+  app.listen(
+    3000,
+    () => {
+      console.log(
+        "Agent listening on :3000"
+      );
+    }
+  );
 }
 
 main().catch(console.error);
