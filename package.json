@@ -8,7 +8,9 @@
     "dev": "pnpm -r --parallel dev",
     "lint": "pnpm -r lint",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "seed": "tsx scripts/seed.ts",
+    "test:agent": "tsx scripts/test-agent.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
