@@ -3,7 +3,7 @@ import { prisma } from "@armoriq/db";
 import { ruleCache } from "../services/rule-cache.service.js";
 
 export async function loadRules() {
-  const rules =
+  const dbRules =
     await prisma.rule.findMany({
       where: {
         enabled: true,
@@ -15,10 +15,14 @@ export async function loadRules() {
     });
 
   ruleCache.setRules(
-    rules.map(
-      rule => rule.config
+    dbRules.map(
+      rule => ({
+        ...(rule.config as any),
+        name: rule.name,
+        description: rule.description,
+      })
     ) as never
   );
-  console.log(`[Startup] Loaded ${rules.length} active rule(s) from database into policy cache.`);
+  console.log(`[Startup] Loaded ${dbRules.length} active rule(s) from database into policy cache.`);
 }
 

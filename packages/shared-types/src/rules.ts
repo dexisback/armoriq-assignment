@@ -26,27 +26,37 @@ export type RiskLevel = z.infer<
 export const BlockToolRuleSchema = z.object({
   type: z.literal("BLOCK_TOOL"),
   toolName: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const ApprovalRuleSchema = z.object({
   type: z.literal("REQUIRE_APPROVAL"),
   toolName: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const InputValidationRuleSchema = z.object({
   type: z.literal("INPUT_VALIDATION"),
   toolName: z.string(),
   allowedPrefix: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const BudgetRuleSchema = z.object({
   type: z.literal("BUDGET_LIMIT"),
   maxTokens: z.number().positive(),
+  name: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const RiskBasedRuleSchema = z.object({
   type: z.literal("RISK_BASED"),
   riskLevel: RiskLevelSchema,
+  name: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export type BlockToolRule = z.infer<

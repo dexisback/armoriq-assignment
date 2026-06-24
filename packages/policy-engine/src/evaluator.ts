@@ -41,6 +41,7 @@ export function evaluateBlockRule(
 
   return {
     decision: PolicyDecisionTypeSchema.enum.DENY,
+    matchedRule: rule.name,
     reason: `Tool ${request.toolName} is blocked`,
     trace,
   };
@@ -67,6 +68,7 @@ export function evaluateApprovalRule(
     decision:
       PolicyDecisionTypeSchema.enum.REQUIRE_APPROVAL,
     reason: "Approval required",
+    matchedRule: rule.name,
     trace,
   };
 }
@@ -80,7 +82,6 @@ export function evaluateValidationRule(
     rule,
     request
   );
-
   trace.push({
     rule: "INPUT_VALIDATION",
     matched: !valid,
@@ -95,6 +96,7 @@ export function evaluateValidationRule(
     decision:
       PolicyDecisionTypeSchema.enum.VALIDATION_FAILED,
     reason: "Input validation failed",
+    matchedRule: rule.name,
     trace,
   };
 }
@@ -123,6 +125,7 @@ export function evaluateBudgetRule(
     decision:
       PolicyDecisionTypeSchema.enum.BUDGET_EXCEEDED,
     reason: "Budget exceeded",
+    matchedRule: rule.name,
     trace,
   };
 }
@@ -152,6 +155,7 @@ export function evaluateRiskRule(
       PolicyDecisionTypeSchema.enum.REQUIRE_APPROVAL,
     reason:
       "High risk action requires approval",
+    matchedRule: rule.name,
     trace,
   };
 }

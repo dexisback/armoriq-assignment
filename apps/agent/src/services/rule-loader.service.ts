@@ -10,7 +10,11 @@ export async function loadRules() {
     });
 
   const rules = dbRules.map(
-    rule => rule.config
+    rule => ({
+      ...(rule.config as any),
+      name: rule.name,
+      description: rule.description,
+    })
   );
 
   ruleCache.setRules(

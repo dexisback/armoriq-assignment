@@ -36,6 +36,7 @@ export type PolicyTraceStep = z.infer<
 export const PolicyDecisionSchema = z.object({
   decision: PolicyDecisionTypeSchema,
   reason: z.string().optional(),
+  matchedRule: z.string().optional(),
   approvalId: z.string().optional(),
   trace: z.array(PolicyTraceStepSchema).optional(),
 });
