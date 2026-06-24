@@ -2,7 +2,6 @@
 import {
   policyEngine,
 } from "@armoriq/policy-engine";
-
 import { registry } from "@armoriq/mcp-registry";
 
 import { ruleCache } from "../rule-cache.service.js";
@@ -10,6 +9,7 @@ import { ruleCache } from "../rule-cache.service.js";
 import { chatService } from "./chat.service.js";
 
 import { toolAdapterService } from "./tool-adapter.service.js";
+import { approvalService } from "../approval.service.js";
 
 export class ToolLoopService {
   async run(
@@ -88,10 +88,15 @@ export class ToolLoopService {
           }
         );
 
-      if (
-        decision.decision !==
-        "ALLOW"
-      ) {
+      if (decision.decision === "REQUIRE_APPROVAL") {
+        const approval = await approvalService.create(
+          functionCall.name,
+          functionCall.args ?? {}
+        );
+        return `Approval required. Approval ID: ${approval.id}`;
+      }
+
+      if (decision.decision !== "ALLOW") {
         return `Tool blocked: ${decision.reason}`;
       }
 
