@@ -1,7 +1,10 @@
 //core agent file
+
+
+//NOTE: we LOG the sus prompts, NOT block them. WHY? because some people MIGHT be using some words for real and not exploiting need not be blocked. Logging works as a warning. //TODO: add a UI popup/advisory of avoiding user not to use certain words or get banned with multiple attempts
 import { logService }
 from "../log.service.js";
-
+import { promptSecurityService, PromptSecurityService } from "../prompt-security.service.js";
 import {
   policyEngine,
 } from "@armoriq/policy-engine";
@@ -18,6 +21,19 @@ export class ToolLoopService {
   async run(
     prompt: string
   ): Promise<string> {
+      const scan = promptSecurityService.scan(prompt)
+      if(scan.suspicious){
+        await logService.create({
+          toolName: "PROMPT_SECURITY",
+          decision: "SUS_PROMPT",
+          reason: scan.matchedPatterns.join(
+            ", "
+          ),
+          trace: scan,
+
+        })
+      }
+
     const discoveredTools =
       registry.getTools();
 
