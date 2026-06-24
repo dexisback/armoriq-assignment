@@ -1,4 +1,7 @@
 //core agent file
+import { logService }
+from "../log.service.js";
+
 import {
   policyEngine,
 } from "@armoriq/policy-engine";
