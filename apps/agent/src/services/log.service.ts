@@ -2,11 +2,12 @@
 
 //single place for writing audit events
 import { prisma } from "@armoriq/db";
-
 interface CreateLogInput {
   toolName: string;
 
-  decision: string;
+  decision: any;
+
+  arguments?: Record<string, unknown>;
 
   reason?: string;
 
@@ -29,16 +30,15 @@ export class LogService {
 
         decision: input.decision,
 
-        reason: input.reason,
+        arguments: (input.arguments ?? {}) as any,
 
-        matchedRule:
-          input.matchedRule,
+        reason: input.reason ?? null,
 
-        approvalId:
-          input.approvalId,
-
-        trace:
-          input.trace ?? [],
+        trace: {
+          ...(typeof input.trace === "object" && input.trace ? (input.trace as any) : {}),
+          matchedRule: input.matchedRule,
+          approvalId: input.approvalId,
+        } as any,
 
         executed:
           input.executed ??

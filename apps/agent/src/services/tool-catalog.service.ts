@@ -1,0 +1,56 @@
+import { prisma } from "@armoriq/db";
+
+import type {
+  DiscoveredTool,
+} from "@armoriq/shared-types";
+
+export class ToolCatalogService {
+  async sync(
+    tools: DiscoveredTool[]
+  ) {
+    for (const tool of tools) {
+      await prisma.toolCatalog.upsert({
+        where: {
+          toolName: tool.name,
+        },
+
+        create: {
+          toolName: tool.name,
+
+          description:
+            tool.description,
+
+          serverId:
+            tool.serverId,
+
+          inferredRisk:
+            tool.riskLevel as any,
+
+          finalRisk:
+            tool.riskLevel as any,
+        },
+
+        update: {
+          description:
+            tool.description,
+
+          inferredRisk:
+            tool.riskLevel as any,
+
+          finalRisk:
+            tool.riskLevel as any,
+
+          updatedAt:
+            new Date(),
+        },
+      });
+    }
+  }
+}
+
+export const toolCatalogService =
+  new ToolCatalogService();
+
+
+
+  
