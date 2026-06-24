@@ -10,23 +10,19 @@ import { toolCatalogService }
 from "../services/tool-catalog.service.js";
 
 export async function discoverTools() {
-//   for (const server of MCP_SERVERS) {
-//     if (server.transport === "sse" && !server.url) {
-//       console.warn(`Skipping SSE MCP server "${server.name}" (not configured).`);
-//       continue;
-//     }
-//     await registry.registerServer(
-//       server
-//     );
-//   }
-for (const server of MCP_SERVERS) {
-  await registry.registerServer(
-    server
+  for (const server of MCP_SERVERS) {
+    if (server.transport === "sse" && (!server.url || server.url.trim() === "")) {
+      console.warn(`Skipping SSE MCP server "${server.name || server.id}" (not configured).`);
+      continue;
+    }
+    try {
+      await registry.registerServer(server);
+    } catch (error) {
+      console.error(`Failed to register MCP server "${server.id}":`, error);
+    }
+  }
+
+  await toolCatalogService.sync(
+    registry.getTools()
   );
-}
-
-await toolCatalogService.sync(
-  registry.getTools()
-);
-
 }

@@ -16,4 +16,5 @@ export async function loadRules() {
   ruleCache.setRules(
     rules as never
   );
+  console.log(`Loaded ${rules.length} active rule(s) into policy engine cache.`);
 }

@@ -19,5 +19,6 @@ export async function loadRules() {
       rule => rule.config
     ) as never
   );
+  console.log(`[Startup] Loaded ${rules.length} active rule(s) from database into policy cache.`);
 }
 
