@@ -25,14 +25,14 @@ export type RiskLevel = z.infer<
 
 export const BlockToolRuleSchema = z.object({
   type: z.literal("BLOCK_TOOL"),
-  toolName: z.string(),
+  toolNames: z.array(z.string()),
   name: z.string().optional(),
   description: z.string().optional(),
 });
 
 export const ApprovalRuleSchema = z.object({
   type: z.literal("REQUIRE_APPROVAL"),
-  toolName: z.string(),
+  toolNames: z.array(z.string()),
   name: z.string().optional(),
   description: z.string().optional(),
 });

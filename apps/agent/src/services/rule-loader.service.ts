@@ -1,24 +1,32 @@
-import { prisma } from "@armoriq/db"
+import { prisma } from "@armoriq/db";
+import { RuleSchema, type Rule } from "@armoriq/shared-types";
 import { ruleCache } from "./rule-cache.service.js";
 
 export async function loadRules() {
-  const dbRules =
-    await prisma.rule.findMany({
-      where: {
-        enabled: true,
-      },
-    });
+  const dbRules = await prisma.rule.findMany({
+    where: {
+      enabled: true,
+    },
+    orderBy: {
+      priority: "asc",
+    },
+  });
 
-  const rules = dbRules.map(
-    rule => ({
-      ...(rule.config as any),
-      name: rule.name,
-      description: rule.description,
+  const rules = dbRules
+    .map(rule => {
+      const parsed = RuleSchema.safeParse({
+        ...(rule.config as any),
+        name: rule.name,
+        description: rule.description ?? undefined,
+      });
+      if (!parsed.success) {
+        console.error(`[Rule Loader] Failed to parse rule "${rule.name}":`, parsed.error.format());
+        return null;
+      }
+      return parsed.data;
     })
-  );
+    .filter((r): r is Rule => r !== null);
 
-  ruleCache.setRules(
-    rules as never
-  );
+  ruleCache.setRules(rules);
   console.log(`Loaded ${rules.length} active rule(s) into policy engine cache.`);
 }

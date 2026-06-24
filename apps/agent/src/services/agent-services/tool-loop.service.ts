@@ -106,7 +106,10 @@ export class ToolLoopService {
               tool.riskLevel,
           }
         );
-
+        console.log(
+  "POLICY DECISION:",
+  decision
+);
       if (decision.decision === "REQUIRE_APPROVAL") {
         await logService.create({
           toolName: functionCall.name,

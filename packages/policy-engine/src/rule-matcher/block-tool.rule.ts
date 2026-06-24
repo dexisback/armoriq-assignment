@@ -4,7 +4,7 @@ export function matchesBlockToolRule(
   rule: BlockToolRule,
   request: PolicyRequest
 ) {
-  return rule.toolName === request.toolName;
+  return rule.toolNames.includes(request.toolName);
 }
 
 
