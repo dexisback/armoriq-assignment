@@ -1,4 +1,8 @@
-import 'dotenv/config';
+import dotenv from "dotenv"
+
+dotenv.config({
+    path: "../../.env",
+});
 
 import { PrismaClient } from '../../../generated/prisma/client.js';
 import { PrismaNeon } from '@prisma/adapter-neon';

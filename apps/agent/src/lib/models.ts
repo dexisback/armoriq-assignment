@@ -3,8 +3,8 @@
 //TODO: later add fallback models asw, like gaspy
 
 export const DEFAULT_MODEL =
-  "gemini-2.5-flash";
+  "gemini-flash-latest";
 
 
 
-  
+

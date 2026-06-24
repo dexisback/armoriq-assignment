@@ -7,7 +7,7 @@ export const MCP_SERVERS = [
         transport: "stdio",
         command: "node",
         args: [
-            "../../custom-mcp/dist/index.js",
+            "../custom-mcp/dist/index.js",
         ],
     },
     {

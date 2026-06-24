@@ -19,7 +19,7 @@ export const MCP_SERVERS: MCPServerConfig[] =
       command: "node",
 
       args: [
-        "../../custom-mcp/dist/index.js",
+        "../custom-mcp/dist/index.js",
       ],
     },
 
