@@ -92,6 +92,7 @@ model ToolExecutionLog {
   executed Boolean
 
   createdAt DateTime @default(now())
+  eventType   AuditEventType
 }
 
 model Conversation {
@@ -160,3 +161,15 @@ model ToolCatalog {
 
   updatedAt DateTime @updatedAt
 }
+
+
+
+
+enum AuditEventType{
+    TOOL_EXECUTION
+    PROMPT_INJECTION
+    APPROVAL_CREATED
+    APPROVAL_APPROVED
+    APPROVAL_REJECTED
+}
+

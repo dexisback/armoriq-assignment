@@ -44,7 +44,9 @@ approvalRouter.post(
       //audit logs for approval:
       await logService.create({
         toolName: approval.toolName,
-        decision:"APPROVED",
+        decision: "ALLOW",
+        eventType: "APPROVAL_APPROVED",
+        arguments: approval.arguments as any,
         approvalId: approval.id,
         executed: true
       })
@@ -67,7 +69,9 @@ approvalRouter.post(
       //approval rejection logs:
       await logService.create({
         toolName: approval.toolName,
-        decision: "REJECTED",
+        decision: "DENY",
+        eventType: "APPROVAL_REJECTED",
+        arguments: approval.arguments as any,
         approvalId: approval.id,
       })
 

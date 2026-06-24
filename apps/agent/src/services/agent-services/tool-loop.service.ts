@@ -25,12 +25,12 @@ export class ToolLoopService {
       if(scan.suspicious){
         await logService.create({
           toolName: "PROMPT_SECURITY",
-          decision: "SUS_PROMPT",
+          decision: "ALLOW",
+          eventType: "PROMPT_INJECTION",
           reason: scan.matchedPatterns.join(
             ", "
           ),
           trace: scan,
-
         })
       }
 
@@ -108,14 +108,48 @@ export class ToolLoopService {
         );
 
       if (decision.decision === "REQUIRE_APPROVAL") {
+        await logService.create({
+          toolName: functionCall.name,
+          decision: "REQUIRE_APPROVAL",
+          eventType: "TOOL_EXECUTION",
+          arguments: functionCall.args ?? {},
+          reason: decision.reason,
+          matchedRule: decision.matchedRule,
+          riskLevel: tool.riskLevel,
+          conversationId: "default",
+        });
+
         const approval = await approvalService.create(
           functionCall.name,
           functionCall.args ?? {}
         );
+
+        await logService.create({
+          toolName: functionCall.name,
+          decision: "REQUIRE_APPROVAL",
+          eventType: "APPROVAL_CREATED",
+          arguments: functionCall.args ?? {},
+          approvalId: approval.id,
+          reason: decision.reason,
+          matchedRule: decision.matchedRule,
+          riskLevel: tool.riskLevel,
+          conversationId: "default",
+        });
+
         return `Approval required. Approval ID: ${approval.id}`;
       }
 
       if (decision.decision !== "ALLOW") {
+        await logService.create({
+          toolName: functionCall.name,
+          decision: decision.decision as any,
+          eventType: "TOOL_EXECUTION",
+          arguments: functionCall.args ?? {},
+          reason: decision.reason,
+          matchedRule: decision.matchedRule,
+          riskLevel: tool.riskLevel,
+          conversationId: "default",
+        });
         return `Tool blocked: ${decision.reason}`;
       }
 
@@ -124,6 +158,18 @@ export class ToolLoopService {
           functionCall.name,
           functionCall.args ?? {}
         );
+
+      await logService.create({
+        toolName: functionCall.name,
+        decision: "ALLOW",
+        eventType: "TOOL_EXECUTION",
+        arguments: functionCall.args ?? {},
+        executed: true,
+        reason: decision.reason,
+        matchedRule: decision.matchedRule,
+        riskLevel: tool.riskLevel,
+        conversationId: "default",
+      });
 
       response =
         await chatService.generate(

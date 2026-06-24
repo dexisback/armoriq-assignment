@@ -20,3 +20,6 @@ if (!connectionString) {
 const adapter = new PrismaNeon({ connectionString });
 
 export const prisma = new PrismaClient({ adapter });
+
+export * from '../../../generated/prisma/enums.js';
+
