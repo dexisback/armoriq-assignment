@@ -45,6 +45,43 @@ export class ApprovalService {
       },
     });
   }
+
+  async getById(id: string){
+    return prisma.approval.findUnique({
+        where: { id }
+    })
+  }
+
+
+  //expire pending. NOTE ⚠️⚠️⚠️ temperory. to be added as a cron
+  async expirePending() {
+  const thirtyMinutesAgo =
+    new Date(
+      Date.now() -
+      30 * 60 * 1000
+    );
+
+  return prisma.approval.updateMany({
+    where: {
+      status: "PENDING",
+
+      createdAt: {
+        lt: thirtyMinutesAgo,
+      },
+    },
+
+    data: {
+      status: "EXPIRED",
+
+      resolvedAt:
+        new Date(),
+
+      resolutionReason:
+        "Approval expired",
+    },
+  });
+}
+
 }
 
 export const approvalService =

@@ -1,7 +1,8 @@
 //approval api:
 import { Router } from "express";
-
+import { approvalExecutionService } from "../services/approval-execution.service.js";
 import { approvalService } from "../services/approval.service.js";
+import { logService } from "../services/log.service.js";
 
 export const approvalRouter =
   Router();
@@ -16,6 +17,17 @@ approvalRouter.get(
   }
 );
 
+// approvalRouter.post(
+//   "/approvals/:id/approve",
+//   async (req, res) => {
+//     const approval =
+//       await approvalService.approve(
+//         req.params.id
+//       );
+
+//     res.json(approval);
+//   }
+// );
 approvalRouter.post(
   "/approvals/:id/approve",
   async (req, res) => {
@@ -24,10 +36,26 @@ approvalRouter.post(
         req.params.id
       );
 
-    res.json(approval);
+    const result =
+      await approvalExecutionService.execute(
+        approval.id
+      );
+
+      //audit logs for approval:
+      await logService.create({
+        toolName: approval.toolName,
+        decision:"APPROVED",
+        approvalId: approval.id,
+        executed: true
+      })
+
+
+    return res.json({
+      approval,
+      result,
+    });
   }
 );
-
 approvalRouter.post(
   "/approvals/:id/reject",
   async (req, res) => {
@@ -35,6 +63,13 @@ approvalRouter.post(
       await approvalService.reject(
         req.params.id
       );
+
+      //approval rejection logs:
+      await logService.create({
+        toolName: approval.toolName,
+        decision: "REJECTED",
+        approvalId: approval.id,
+      })
 
     res.json(approval);
   }
