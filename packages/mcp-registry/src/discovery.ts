@@ -1,7 +1,7 @@
 //connects to MCP servers
 //runs tools/list, builds discoveredTools() , adds risk level , persists with building toolCatalog, returns tool to registry
 
-
+import { resolveRisk } from "./risk-resolver.js";
 
 import type {
   DiscoveredTool,
@@ -54,22 +54,56 @@ export async function discoverTools(
   const response =
     await client.listTools();
 
-  return response.tools.map(
-    tool => ({
-      name: tool.name,
+//   return response.tools.map(
+//     tool => ({
+//       name: tool.name,
 
-      description:
-        tool.description ?? "",
+//       description:
+//         tool.description ?? "",
 
-      serverId: server.id,
+//       serverId: server.id,
 
-      inputSchema:
-        tool.inputSchema,
+//       inputSchema:
+//         tool.inputSchema,
 
-      riskLevel: inferRisk(
-        tool.name,
-        tool.description ?? ""
-      ),
-    })
+//       riskLevel: inferRisk(
+//         tool.name,
+//         tool.description ?? ""
+//       ),
+const discoveredTools =
+  await Promise.all(
+    response.tools.map(
+      async tool => {
+        const inferredRisk =
+          inferRisk(
+            tool.name,
+            tool.description ?? ""
+          );
+
+        const classification =
+          await resolveRisk(
+            tool.name,
+            inferredRisk
+          );
+
+        return {
+          name: tool.name,
+
+          description:
+            tool.description ?? "",
+
+          serverId:
+            server.id,
+
+          inputSchema:
+            tool.inputSchema,
+
+          riskLevel:
+            classification.finalRisk,
+        };
+      }
+    )
   );
+
+  return discoveredTools;
 }

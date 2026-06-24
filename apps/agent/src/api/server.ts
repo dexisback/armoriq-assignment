@@ -6,6 +6,7 @@ import { healthRouter } from "../health/health.route.js";
 import { logRouter } from "./log.routes.js";
 import { toolRouter } from "./tool.routes.js";
 import { ruleRouter } from "./rule.routes.js";
+import { riskRouter } from "./risk.routes.js";
 
 export function createServer() {
   const app = express();
@@ -23,5 +24,6 @@ export function createServer() {
   app.use(logRouter)
   app.use(toolRouter)
   app.use(ruleRouter)
+  app.use(riskRouter)
   return app;
 }

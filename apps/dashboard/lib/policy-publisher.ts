@@ -6,3 +6,5 @@ export async function publishPolicyUpdate() {
     console.log("publishing....")
   await redis.publish("policy:updated", "refresh");
 }
+
+
