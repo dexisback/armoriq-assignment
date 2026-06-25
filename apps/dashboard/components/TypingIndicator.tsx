@@ -8,17 +8,24 @@ export function TypingIndicator() {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="h-1.5 w-1.5 rounded-full bg-accent"
-          animate={{ y: [0, -3, 0] }}
+          className="h-1.5 w-1.5 rounded-full bg-accent shadow-sm"
+          animate={{
+            y: [0, -4, 0],
+            scale: [1, 1.1, 1],
+          }}
           transition={{
-            duration: 0.8,
+            type: "spring",
+            duration: 0.3,
+            bounce: 0,
             repeat: Infinity,
-            delay: i * 0.15,
-            ease: "easeInOut",
+            repeatDelay: 0.6,
+            delay: i * 0.1,
           }}
         />
       ))}
-      <span className="text-[10px] text-muted-foreground ml-2 font-mono">Thinking...</span>
+      <span className="text-[10px] text-muted-foreground ml-2 font-mono tabular-nums">
+        Thinking...
+      </span>
     </div>
   );
 }

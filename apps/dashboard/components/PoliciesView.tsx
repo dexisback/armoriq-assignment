@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Plus, 
-  Trash2, 
-  X, 
-  ToggleLeft, 
-  ToggleRight, 
-  Sparkles, 
-  Pencil, 
-  ChevronDown, 
-  ChevronUp, 
-  Shield 
-} from "lucide-react";
+import { Shield } from "lucide-react";
+import {
+  ToggleOn,
+  ToggleOff,
+  EditIcon,
+  DeleteIcon,
+  CloseIcon,
+  PlusIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  SparklesIcon,
+} from "./icons";
 import { sound } from "./SoundSystem";
 
 export function PoliciesView() {
@@ -35,9 +35,11 @@ export function PoliciesView() {
     }
   }, [isModalOpen, hasMounted]);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
-  
+
   // Collapsed rule JSON states
-  const [expandedRuleIds, setExpandedRuleIds] = useState<Record<string, boolean>>({});
+  const [expandedRuleIds, setExpandedRuleIds] = useState<
+    Record<string, boolean>
+  >({});
 
   // Form states
   const [name, setName] = useState("");
@@ -56,12 +58,12 @@ export function PoliciesView() {
     try {
       setLoading(true);
       const [rulesRes, toolsRes] = await Promise.all([
-        fetch("/api/rules").then(r => r.json()),
-        fetch("/api/tools").then(r => r.json()),
+        fetch("/api/rules").then((r) => r.json()),
+        fetch("/api/tools").then((r) => r.json()),
       ]);
       setRules(rulesRes || []);
       setTools(toolsRes || []);
-      
+
       if (toolsRes && toolsRes.length > 0) {
         setSelectedTool(toolsRes[0].toolName);
       }
@@ -98,17 +100,17 @@ export function PoliciesView() {
       case "BLOCK_TOOL":
         return {
           type: "BLOCK_TOOL",
-          toolNames: [selectedTool || (tools[0]?.toolName || "")],
+          toolNames: [selectedTool || tools[0]?.toolName || ""],
         };
       case "REQUIRE_APPROVAL":
         return {
           type: "REQUIRE_APPROVAL",
-          toolNames: [selectedTool || (tools[0]?.toolName || "")],
+          toolNames: [selectedTool || tools[0]?.toolName || ""],
         };
       case "INPUT_VALIDATION":
         return {
           type: "INPUT_VALIDATION",
-          toolName: selectedTool || (tools[0]?.toolName || ""),
+          toolName: selectedTool || tools[0]?.toolName || "",
           allowedPrefix: allowedPrefix || "/sandbox/",
         };
       case "RISK_BASED":
@@ -171,7 +173,7 @@ export function PoliciesView() {
     setDescription(rule.description || "");
     setType(rule.type);
     setPriority(rule.priority);
-    
+
     const config = rule.config || {};
     if (rule.type === "BLOCK_TOOL" || rule.type === "REQUIRE_APPROVAL") {
       setSelectedTool(config.toolNames?.[0] || "");
@@ -184,7 +186,7 @@ export function PoliciesView() {
     } else if (rule.type === "BUDGET_LIMIT") {
       setMaxTokens(config.maxTokens || 50000);
     }
-    
+
     setIsAdvancedOpen(false);
     setIsModalOpen(true);
   }
@@ -197,7 +199,11 @@ export function PoliciesView() {
       } else {
         sound.playToggleOff();
       }
-      setRules(prev => prev.map(r => r.id === rule.id ? { ...r, enabled: updatedEnabled } : r));
+      setRules((prev) =>
+        prev.map((r) =>
+          r.id === rule.id ? { ...r, enabled: updatedEnabled } : r,
+        ),
+      );
 
       const res = await fetch(`/api/rules/${rule.id}`, {
         method: "PATCH",
@@ -219,7 +225,7 @@ export function PoliciesView() {
     if (!confirm("Are you sure you want to delete this rule?")) return;
 
     try {
-      setRules(prev => prev.filter(r => r.id !== id));
+      setRules((prev) => prev.filter((r) => r.id !== id));
       sound.playSuccess();
 
       const res = await fetch(`/api/rules/${id}`, {
@@ -284,7 +290,7 @@ export function PoliciesView() {
   }
 
   function toggleExpandRuleJson(id: string) {
-    setExpandedRuleIds(prev => ({
+    setExpandedRuleIds((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
@@ -303,7 +309,10 @@ export function PoliciesView() {
 
         <div className="grid grid-cols-1 gap-4">
           {Array.from({ length: 3 }).map((_, idx) => (
-            <div key={idx} className="p-4 rounded-lg border border-border/40 bg-card/25 h-[120px] flex flex-col justify-between">
+            <div
+              key={idx}
+              className="p-4 rounded-lg border border-border/40 bg-card/25 h-[120px] flex flex-col justify-between"
+            >
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <div className="h-4 bg-muted/65 rounded w-1/4" />
@@ -327,16 +336,19 @@ export function PoliciesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Security Policies & Rules</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            Security Policies & Rules
+          </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Build guards to block tools, enforce path scopes, require approvals, or limit usage budgets.
+            Build guards to block tools, enforce path scopes, require approvals,
+            or limit usage budgets.
           </p>
         </div>
         <button
           onClick={openAddModal}
-          className="app-btn-3d flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer"
+          className="app-btn-3d flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-[transform,box-shadow] duration-200 ease-out cursor-pointer active:scale-[0.96] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_4px_12px_rgba(var(--accent-rgb),0.2)]"
         >
-          <Plus size={14} />
+          <PlusIcon size={14} strokeWidth={2} />
           New Policy
         </button>
       </div>
@@ -344,42 +356,50 @@ export function PoliciesView() {
       {rules.length === 0 ? (
         <div className="text-center py-16 rounded-lg border border-border bg-card/45">
           <Shield className="mx-auto text-muted-foreground mb-3" size={24} />
-          <h3 className="text-sm font-semibold text-foreground">No Policies Found</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            No Policies Found
+          </h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
             Define safety schemas to protect your systems.
           </p>
           <button
             onClick={openAddModal}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-medium cursor-pointer"
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-medium cursor-pointer transition-[background-color,transform] duration-200 ease-out active:scale-[0.96]"
           >
             Create Your First Rule
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {rules.map((rule) => {
+          {rules.map((rule, index) => {
             const isJsonExpanded = expandedRuleIds[rule.id] || false;
-            
+
             return (
               <div
                 key={rule.id}
-                className={`group p-4 rounded-lg app-glass app-card-3d cursor-pointer transition-all duration-200 ${
+                className={`group p-4 rounded-lg app-glass app-card-3d cursor-pointer transition-[opacity,transform] duration-200 ease-out hover:shadow-lg ${
                   rule.enabled ? "" : "opacity-60"
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="text-xs font-semibold text-foreground">{rule.name}</span>
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-medium uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                      <span className="text-xs font-semibold text-foreground group-hover:text-accent transition-colors duration-180">
+                        {rule.name}
+                      </span>
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-medium uppercase tracking-wider bg-accent/15 text-accent border border-accent/25 shadow-sm">
                         {rule.type}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-mono font-tabular">
+                      <span
+                        className="text-[10px] text-muted-foreground font-mono"
+                        style={{ fontVariantNumeric: "tabular-nums" }}
+                      >
                         Priority: {rule.priority}
                       </span>
                     </div>
                     {rule.description && (
-                      <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
+                      <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-[max-height,opacity] duration-300 ease-out overflow-hidden">
                         <p className="text-xs text-muted-foreground leading-relaxed pt-1.5 max-w-2xl">
                           {rule.description}
                         </p>
@@ -387,17 +407,30 @@ export function PoliciesView() {
                     )}
 
                     {/* Summary Parameters Block (Redesigned Human-Readable UX) */}
-                    <div className="mt-3 bg-background/50 border border-border/80 rounded-xl p-3.5 max-w-2xl">
+                    <div
+                      className="mt-3 bg-background/50 border border-border/70 rounded-xl p-3.5 max-w-2xl shadow-sm"
+                      style={{
+                        boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.05)",
+                      }}
+                    >
                       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
                         {rule.type === "BLOCK_TOOL" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Target Tool</span>
-                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Target Tool
+                              </span>
+                              <p className="font-medium text-foreground mt-0.5">
+                                {rule.config?.toolNames?.[0] || "N/A"}
+                              </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
-                              <p className="font-medium text-rose-500 dark:text-rose-400 mt-0.5">Block Tool</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Action
+                              </span>
+                              <p className="font-medium text-rose-500 dark:text-rose-400 mt-0.5">
+                                Block Tool
+                              </p>
                             </div>
                           </>
                         )}
@@ -405,12 +438,20 @@ export function PoliciesView() {
                         {rule.type === "REQUIRE_APPROVAL" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Target Tool</span>
-                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Target Tool
+                              </span>
+                              <p className="font-medium text-foreground mt-0.5">
+                                {rule.config?.toolNames?.[0] || "N/A"}
+                              </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
-                              <p className="font-medium text-amber-500 mt-0.5">Require Human Approval</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Action
+                              </span>
+                              <p className="font-medium text-amber-500 mt-0.5">
+                                Require Human Approval
+                              </p>
                             </div>
                           </>
                         )}
@@ -418,12 +459,20 @@ export function PoliciesView() {
                         {rule.type === "INPUT_VALIDATION" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Tool</span>
-                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolName || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Tool
+                              </span>
+                              <p className="font-medium text-foreground mt-0.5">
+                                {rule.config?.toolName || "N/A"}
+                              </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Allowed Prefix</span>
-                              <p className="font-mono font-medium text-accent mt-0.5">{rule.config?.allowedPrefix || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Allowed Prefix
+                              </span>
+                              <p className="font-mono font-medium text-accent mt-0.5">
+                                {rule.config?.allowedPrefix || "N/A"}
+                              </p>
                             </div>
                           </>
                         )}
@@ -431,13 +480,21 @@ export function PoliciesView() {
                         {rule.type === "RISK_BASED" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Minimum Risk</span>
-                              <p className="font-medium text-foreground mt-0.5 font-mono">{rule.config?.minimumRisk || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Minimum Risk
+                              </span>
+                              <p className="font-medium text-foreground mt-0.5 font-mono">
+                                {rule.config?.minimumRisk || "N/A"}
+                              </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Action
+                              </span>
                               <p className="font-medium text-foreground mt-0.5">
-                                {rule.config?.decision === "REQUIRE_APPROVAL" ? "Require Approval" : "Deny"}
+                                {rule.config?.decision === "REQUIRE_APPROVAL"
+                                  ? "Require Approval"
+                                  : "Deny"}
                               </p>
                             </div>
                           </>
@@ -446,14 +503,23 @@ export function PoliciesView() {
                         {rule.type === "BUDGET_LIMIT" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Maximum Tokens</span>
-                              <p className="font-medium text-foreground mt-0.5 font-mono font-tabular">
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Maximum Tokens
+                              </span>
+                              <p
+                                className="font-medium text-foreground mt-0.5 font-mono"
+                                style={{ fontVariantNumeric: "tabular-nums" }}
+                              >
                                 {(rule.config?.maxTokens || 0).toLocaleString()}
                               </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
-                              <p className="font-medium text-foreground mt-0.5">Budget Limit</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
+                                Action
+                              </span>
+                              <p className="font-medium text-foreground mt-0.5">
+                                Budget Limit
+                              </p>
                             </div>
                           </>
                         )}
@@ -464,45 +530,62 @@ export function PoliciesView() {
                     <div className="mt-3">
                       <button
                         onClick={() => toggleExpandRuleJson(rule.id)}
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors duration-180"
                       >
                         Advanced
-                        {isJsonExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        {isJsonExpanded ? (
+                          <ChevronUpIcon size={12} strokeWidth={2} />
+                        ) : (
+                          <ChevronDownIcon size={12} strokeWidth={2} />
+                        )}
                       </button>
-                      
+
                       {isJsonExpanded && (
-                        <pre className="mt-1.5 text-[10px] font-mono bg-background border border-border p-3 rounded-lg overflow-x-auto text-foreground">
+                        <pre
+                          className="mt-1.5 text-[10px] font-mono bg-background border border-border/60 p-3 rounded-lg overflow-x-auto text-foreground shadow-sm"
+                          style={{
+                            boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.05)",
+                          }}
+                        >
                           {JSON.stringify(rule.config, null, 2)}
                         </pre>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleToggleRule(rule)}
-                      className="p-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="p-2 hover:bg-muted/40 rounded-lg cursor-pointer transition-[background-color,transform,box-shadow] duration-180 ease-out active:scale-[0.96] group"
                       title={rule.enabled ? "Disable Rule" : "Enable Rule"}
                     >
                       {rule.enabled ? (
-                        <ToggleRight size={26} className="text-accent" />
+                        <ToggleOn
+                          size={20}
+                          className="text-accent group-hover:drop-shadow-[0_0_4px_rgba(var(--accent-rgb),0.4)]"
+                          strokeWidth={1.5}
+                        />
                       ) : (
-                        <ToggleLeft size={26} className="text-muted-foreground/60" />
+                        <ToggleOff
+                          size={20}
+                          className="text-muted-foreground/50 group-hover:text-muted-foreground"
+                          strokeWidth={1.5}
+                        />
                       )}
                     </button>
                     <button
                       onClick={() => openEditModal(rule)}
-                      className="p-2 border border-border hover:border-accent/40 text-muted-foreground hover:text-foreground rounded-lg cursor-pointer transition-colors"
+                      className="p-2.5 border border-border/50 hover:border-accent/40 hover:bg-accent/8 text-muted-foreground hover:text-accent rounded-lg cursor-pointer transition-[background-color,border-color,color,transform,box-shadow] duration-180 ease-out active:scale-[0.96] hover:shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]"
                       title="Edit Rule"
                     >
-                      <Pencil size={12} />
+                      <EditIcon size={14} strokeWidth={1.5} />
                     </button>
                     <button
                       onClick={() => handleDeleteRule(rule.id)}
-                      className="p-2 border border-border hover:border-rose-500/30 hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 rounded-lg cursor-pointer transition-colors"
+                      className="p-2.5 border border-border/50 hover:border-rose-500/40 hover:bg-rose-500/12 text-muted-foreground hover:text-rose-500 rounded-lg cursor-pointer transition-[background-color,border-color,color,transform,box-shadow] duration-180 ease-out active:scale-[0.96] hover:shadow-[0_0_8px_rgba(244,63,94,0.15)]"
                       title="Delete Rule"
                     >
-                      <Trash2 size={12} />
+                      <DeleteIcon size={14} strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
@@ -518,13 +601,15 @@ export function PoliciesView() {
           <div className="w-full max-w-lg app-glass rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5 border-b border-border pb-3">
               <h3 className="text-sm font-semibold text-foreground">
-                {editingRuleId ? "Edit Security Policy" : "Create New Security Policy"}
+                {editingRuleId
+                  ? "Edit Security Policy"
+                  : "Create New Security Policy"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-muted/60 text-muted-foreground rounded-lg cursor-pointer"
+                className="p-1.5 hover:bg-muted/60 text-muted-foreground hover:text-foreground rounded-lg cursor-pointer transition-[background-color,color,transform] duration-180 ease-out active:scale-[0.96]"
               >
-                <X size={16} />
+                <CloseIcon size={16} strokeWidth={2} />
               </button>
             </div>
 
@@ -539,7 +624,7 @@ export function PoliciesView() {
                   placeholder="e.g. Block file writes"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition-[border-color,box-shadow] duration-200 ease-out"
                 />
               </div>
 
@@ -552,7 +637,7 @@ export function PoliciesView() {
                   placeholder="Enforces security constraints on active tools"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent resize-none"
+                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent resize-none transition-[border-color,box-shadow] duration-200 ease-out"
                 />
               </div>
 
@@ -564,7 +649,7 @@ export function PoliciesView() {
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
-                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition-[border-color] duration-200 ease-out"
                   >
                     <option value="BLOCK_TOOL">BLOCK_TOOL</option>
                     <option value="REQUIRE_APPROVAL">REQUIRE_APPROVAL</option>
@@ -583,13 +668,16 @@ export function PoliciesView() {
                     min="1"
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
-                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono transition-[border-color] duration-200 ease-out"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
                   />
                 </div>
               </div>
 
               {/* DYNAMIC FIELD SECTIONS */}
-              {(type === "BLOCK_TOOL" || type === "REQUIRE_APPROVAL" || type === "INPUT_VALIDATION") && (
+              {(type === "BLOCK_TOOL" ||
+                type === "REQUIRE_APPROVAL" ||
+                type === "INPUT_VALIDATION") && (
                 <div>
                   <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Target Tool
@@ -597,7 +685,7 @@ export function PoliciesView() {
                   <select
                     value={selectedTool}
                     onChange={(e) => setSelectedTool(e.target.value)}
-                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition-[border-color] duration-200 ease-out"
                   >
                     {tools.map((t) => (
                       <option key={t.id} value={t.toolName}>
@@ -619,7 +707,7 @@ export function PoliciesView() {
                     value={allowedPrefix}
                     onChange={(e) => setAllowedPrefix(e.target.value)}
                     placeholder="/sandbox/"
-                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono transition-[border-color] duration-200 ease-out"
                   />
                 </div>
               )}
@@ -633,7 +721,7 @@ export function PoliciesView() {
                     <select
                       value={minimumRisk}
                       onChange={(e) => setMinimumRisk(e.target.value)}
-                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition-[border-color] duration-200 ease-out"
                     >
                       <option value="LOW">LOW</option>
                       <option value="MEDIUM">MEDIUM</option>
@@ -649,7 +737,7 @@ export function PoliciesView() {
                     <select
                       value={decision}
                       onChange={(e) => setDecision(e.target.value)}
-                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition-[border-color] duration-200 ease-out"
                     >
                       <option value="REQUIRE_APPROVAL">REQUIRE_APPROVAL</option>
                       <option value="DENY">DENY</option>
@@ -669,13 +757,17 @@ export function PoliciesView() {
                     required
                     value={maxTokens}
                     onChange={(e) => setMaxTokens(Number(e.target.value))}
-                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono transition-[border-color] duration-200 ease-out"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
                   />
                 </div>
               )}
 
               {/* HUMAN READABLE PREVIEW PANEL */}
-              <div className="p-3 bg-muted/40 border border-border/80 rounded-xl">
+              <div
+                className="p-3 bg-muted/40 border border-border/70 rounded-xl shadow-sm"
+                style={{ boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.03)" }}
+              >
                 <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1">
                   Summary Preview
                 </span>
@@ -689,10 +781,14 @@ export function PoliciesView() {
                 <button
                   type="button"
                   onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors duration-180"
                 >
                   Advanced
-                  {isAdvancedOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  {isAdvancedOpen ? (
+                    <ChevronUpIcon size={12} strokeWidth={2} />
+                  ) : (
+                    <ChevronDownIcon size={12} strokeWidth={2} />
+                  )}
                 </button>
 
                 {isAdvancedOpen && (
@@ -700,7 +796,12 @@ export function PoliciesView() {
                     <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block">
                       Generated Config JSON:
                     </span>
-                    <pre className="text-[10px] font-mono bg-background border border-border p-3 rounded-lg overflow-x-auto text-foreground">
+                    <pre
+                      className="text-[10px] font-mono bg-background border border-border/60 p-3 rounded-lg overflow-x-auto text-foreground shadow-sm"
+                      style={{
+                        boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.05)",
+                      }}
+                    >
                       {JSON.stringify(getGeneratedConfig(), null, 2)}
                     </pre>
                   </div>
@@ -711,16 +812,27 @@ export function PoliciesView() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border rounded-xl text-xs font-medium hover:bg-muted/40 cursor-pointer"
+                  className="px-4 py-2 border border-border rounded-xl text-xs font-medium hover:bg-muted/40 cursor-pointer transition-[background-color,transform] duration-200 ease-out active:scale-[0.96]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || (type === "BLOCK_TOOL" || type === "REQUIRE_APPROVAL" || type === "INPUT_VALIDATION" ? !selectedTool : false)}
-                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer disabled:opacity-50"
+                  disabled={
+                    submitting ||
+                    (type === "BLOCK_TOOL" ||
+                    type === "REQUIRE_APPROVAL" ||
+                    type === "INPUT_VALIDATION"
+                      ? !selectedTool
+                      : false)
+                  }
+                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-[opacity,transform] duration-200 ease-out hover:opacity-90 cursor-pointer disabled:opacity-50 active:scale-[0.96]"
                 >
-                  {submitting ? "Saving..." : editingRuleId ? "Save Changes" : "Create Policy"}
+                  {submitting
+                    ? "Saving..."
+                    : editingRuleId
+                      ? "Save Changes"
+                      : "Create Policy"}
                 </button>
               </div>
             </form>

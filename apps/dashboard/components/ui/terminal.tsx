@@ -270,7 +270,7 @@ function SyntaxHighlightedText({ text }: { text: string }) {
   );
 }
 
-interface TerminalLine {
+export interface TerminalLine {
   type: "command" | "output";
   content: string;
 }
@@ -283,20 +283,20 @@ export interface FAQItem {
 const defaultFAQs: FAQItem[] = [
   {
     q: "How does the Policy Engine evaluate requests?",
-    cmd: "armoriq --status"
+    cmd: "armoriq --status",
   },
   {
     q: "What happens if a prompt injection is detected?",
-    cmd: "armoriq evaluate --prompt \"Ignore rules...\""
+    cmd: 'armoriq evaluate --prompt "Ignore rules..."',
   },
   {
     q: "How are file path access restrictions enforced?",
-    cmd: "armoriq run --tool filesystem:read_file --path \"/etc/passwd\""
-  }
+    cmd: 'armoriq run --tool filesystem:read_file --path "/etc/passwd"',
+  },
 ];
 
 export interface TerminalProps {
-  commands: string[];
+  commands?: string[];
   outputs?: Record<number, string[]>;
   username?: string;
   className?: string;
@@ -307,6 +307,9 @@ export interface TerminalProps {
   faqList?: FAQItem[];
   loop?: boolean;
   onSelectFAQ?: (item: FAQItem) => void;
+  interactive?: boolean;
+  liveInput?: string;
+  history?: TerminalLine[];
 }
 
 export function Terminal({
@@ -321,6 +324,9 @@ export function Terminal({
   faqList = defaultFAQs,
   loop = true,
   onSelectFAQ,
+  interactive = false,
+  liveInput = "",
+  history = [],
 }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -345,13 +351,13 @@ export function Terminal({
   const isLastCommand = commandIdx === commands.length - 1;
 
   useEffect(() => {
-    if (!inView || phase !== "idle") return;
+    if (interactive || !inView || phase !== "idle") return;
     const t = setTimeout(() => setPhase("typing"), initialDelay);
     return () => clearTimeout(t);
-  }, [inView, phase, initialDelay]);
+  }, [inView, phase, initialDelay, interactive]);
 
   useEffect(() => {
-    if (phase !== "typing") return;
+    if (interactive || phase !== "typing") return;
 
     if (charIdx < currentCommand.length) {
       const char = currentCommand[charIdx];
@@ -373,10 +379,10 @@ export function Terminal({
       }, 80);
       return () => clearTimeout(t);
     }
-  }, [phase, charIdx, currentCommand, typingSpeed, down, up]);
+  }, [phase, charIdx, currentCommand, typingSpeed, down, up, interactive]);
 
   useEffect(() => {
-    if (phase !== "executing") return;
+    if (interactive || phase !== "executing") return;
 
     setLines((prev) => [...prev, { type: "command", content: currentCommand }]);
     setCurrentText("");
@@ -389,10 +395,16 @@ export function Terminal({
     } else {
       setPhase("pausing");
     }
-  }, [phase, currentCommand, currentOutputs.length, isLastCommand]);
+  }, [
+    phase,
+    currentCommand,
+    currentOutputs.length,
+    isLastCommand,
+    interactive,
+  ]);
 
   useEffect(() => {
-    if (phase !== "outputting") return;
+    if (interactive || phase !== "outputting") return;
 
     if (outputIdx >= 0 && outputIdx < currentOutputs.length) {
       const t = setTimeout(() => {
@@ -413,10 +425,10 @@ export function Terminal({
       }, 300);
       return () => clearTimeout(t);
     }
-  }, [phase, outputIdx, currentOutputs, isLastCommand]);
+  }, [phase, outputIdx, currentOutputs, isLastCommand, interactive]);
 
   useEffect(() => {
-    if (phase !== "pausing") return;
+    if (interactive || phase !== "pausing") return;
     const t = setTimeout(() => {
       setCharIdx(0);
       setOutputIdx(-1);
@@ -424,10 +436,10 @@ export function Terminal({
       setPhase("typing");
     }, delayBetweenCommands);
     return () => clearTimeout(t);
-  }, [phase, delayBetweenCommands]);
+  }, [phase, delayBetweenCommands, interactive]);
 
   useEffect(() => {
-    if (phase !== "done" || !loop) return;
+    if (interactive || phase !== "done" || !loop) return;
     const t = setTimeout(() => {
       setLines([]);
       setCharIdx(0);
@@ -436,10 +448,10 @@ export function Terminal({
       setPhase("typing");
     }, 3000);
     return () => clearTimeout(t);
-  }, [phase, loop]);
+  }, [phase, loop, interactive]);
 
   useEffect(() => {
-    const interval = setInterval(() => setCursorVisible((v) => !v), 530);
+    const interval = setInterval(() => setCursorVisible((v) => !v), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -447,7 +459,7 @@ export function Terminal({
     if (contentRef.current) {
       contentRef.current.scrollTop = contentRef.current.scrollHeight;
     }
-  }, [lines, phase]);
+  }, [lines, phase, history, liveInput]);
 
   const prompt = (
     <span className="text-neutral-500">
@@ -466,13 +478,13 @@ export function Terminal({
         className,
       )}
     >
-      <div className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 shadow-2xl">
+      <div className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 shadow-[0_4px_6px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.15),0_16px_32px_rgba(0,0,0,0.12)]">
         {/* Title Bar */}
-        <div className="flex items-center justify-between bg-neutral-800 px-4 py-3">
+        <div className="flex items-center justify-between bg-neutral-800 px-4 py-3 border-b border-neutral-700/50">
           <div className="flex items-center gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-500 transition-colors hover:bg-red-600" />
-            <div className="h-3 w-3 rounded-full bg-yellow-500 transition-colors hover:bg-yellow-600" />
-            <div className="h-3 w-3 rounded-full bg-green-500 transition-colors hover:bg-green-600" />
+            <div className="h-3 w-3 rounded-full bg-red-500 transition-all duration-200 hover:bg-red-600 hover:scale-110 active:scale-[0.96] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+            <div className="h-3 w-3 rounded-full bg-yellow-500 transition-all duration-200 hover:bg-yellow-600 hover:scale-110 active:scale-[0.96] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+            <div className="h-3 w-3 rounded-full bg-green-500 transition-all duration-200 hover:bg-green-600 hover:scale-110 active:scale-[0.96] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
           </div>
           <div className="text-center flex-1">
             <span className="truncate text-xs text-neutral-400">
@@ -482,11 +494,11 @@ export function Terminal({
           <div className="relative group">
             <button
               type="button"
-              className="px-2 py-0.5 rounded-full bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 text-[10px] font-mono text-neutral-300 transition-all font-semibold active:scale-95 cursor-pointer"
+              className="px-2 py-0.5 rounded-full bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 text-[10px] font-mono text-neutral-300 transition-all duration-200 font-semibold active:scale-[0.96] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.2)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.25)] hover:border-neutral-500"
             >
               FAQ
             </button>
-            <div className="absolute right-0 top-full mt-2 w-64 p-3 rounded-xl border border-neutral-800 bg-neutral-950 text-left shadow-2xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-right z-50">
+            <div className="absolute right-0 top-full mt-2 w-64 p-3 rounded-xl border border-neutral-800 bg-neutral-950 text-left shadow-[0_4px_8px_rgba(0,0,0,0.2),0_8px_24px_rgba(0,0,0,0.25)] opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-right z-50">
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-2 border-b border-neutral-800 pb-1">
                 Frequently Asked Questions
               </h4>
@@ -496,12 +508,12 @@ export function Terminal({
                     <p className="text-[10px] font-medium text-neutral-200 leading-normal">
                       Q: {item.q}
                     </p>
-                    <div className="flex items-center justify-between gap-1.5 p-1 bg-neutral-900 border border-neutral-800 rounded font-mono text-[9px] text-neutral-400">
+                    <div className="flex items-center justify-between gap-1.5 p-1 bg-neutral-900 border border-neutral-800 rounded-md font-mono text-[9px] text-neutral-400 tabular-nums">
                       <span className="truncate max-w-[150px]">{item.cmd}</span>
                       <button
                         onClick={() => onSelectFAQ?.(item)}
                         type="button"
-                        className="px-1 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30 transition-all font-semibold active:scale-95 cursor-pointer"
+                        className="px-1 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-150 font-semibold active:scale-[0.96] cursor-pointer hover:shadow-[0_0_8px_rgba(16,185,129,0.15)]"
                       >
                         Run
                       </button>
@@ -516,9 +528,10 @@ export function Terminal({
         {/* Terminal Content */}
         <div
           ref={contentRef}
-          className="no-visible-scrollbar h-80 overflow-y-auto p-4 font-mono"
+          className="no-visible-scrollbar h-80 overflow-y-auto p-4 font-mono scroll-smooth"
+          style={{ scrollBehavior: "smooth" }}
         >
-          {lines.map((line, i) => (
+          {(interactive ? history : lines).map((line, i) => (
             <div key={i} className="leading-relaxed whitespace-pre-wrap">
               {line.type === "command" ? (
                 <span>
@@ -531,27 +544,41 @@ export function Terminal({
             </div>
           ))}
 
-          {phase === "typing" && (
+          {interactive && (
             <div className="leading-relaxed whitespace-pre-wrap">
               {prompt}
-              <SyntaxHighlightedText text={currentText} />
-              <span className="ml-0.5 inline-block h-4 w-2 bg-neutral-300 align-middle" />
-            </div>
-          )}
-
-          {(phase === "done" ||
-            phase === "pausing" ||
-            phase === "outputting") && (
-            <div className="leading-relaxed whitespace-pre-wrap">
-              {prompt}
+              <SyntaxHighlightedText text={liveInput} />
               <span
                 className={cn(
-                  "inline-block h-4 w-2 bg-neutral-300 align-middle transition-opacity duration-100",
-                  !cursorVisible && "opacity-0",
+                  "ml-0.5 inline-block h-4 w-2 bg-neutral-300 align-middle transition-opacity duration-150 ease-linear",
+                  cursorVisible ? "opacity-100" : "opacity-0",
                 )}
               />
             </div>
           )}
+
+          {!interactive && phase === "typing" && (
+            <div className="leading-relaxed whitespace-pre-wrap">
+              {prompt}
+              <SyntaxHighlightedText text={currentText} />
+              <span className="ml-0.5 inline-block h-4 w-2 bg-neutral-300 align-middle shadow-[0_0_4px_rgba(212,212,212,0.4)]" />
+            </div>
+          )}
+
+          {!interactive &&
+            (phase === "done" ||
+              phase === "pausing" ||
+              phase === "outputting") && (
+              <div className="leading-relaxed whitespace-pre-wrap">
+                {prompt}
+                <span
+                  className={cn(
+                    "inline-block h-4 w-2 bg-neutral-300 align-middle transition-opacity duration-150 ease-linear",
+                    cursorVisible ? "opacity-100" : "opacity-0",
+                  )}
+                />
+              </div>
+            )}
         </div>
       </div>
     </div>

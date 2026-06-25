@@ -74,18 +74,13 @@ export function ToolCatalogView() {
     tool.serverId.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  function getRiskBadgeClass(risk: string) {
+  function getRiskTextColor(risk: string) {
     switch (risk) {
-      case "LOW":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
-      case "MEDIUM":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case "HIGH":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
-      case "CRITICAL":
-        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
-      default:
-        return "bg-muted text-muted-foreground border-border";
+      case "LOW":      return "text-emerald-500 dark:text-emerald-400";
+      case "MEDIUM":   return "text-blue-500";
+      case "HIGH":     return "text-amber-500";
+      case "CRITICAL": return "text-rose-500 dark:text-rose-400";
+      default:         return "text-muted-foreground";
     }
   }
 
@@ -189,24 +184,20 @@ export function ToolCatalogView() {
                     {tool.description}
                   </td>
                   <td className="p-4 text-center">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getRiskBadgeClass(tool.inferredRisk)}`}>
+                    <span className={`text-[10px] font-semibold uppercase tracking-wide ${getRiskTextColor(tool.inferredRisk)}`}>
                       {tool.inferredRisk}
                     </span>
                   </td>
                   <td className="p-4 text-center">
-                    <div className="inline-block relative">
-                      <select
-                        value={tool.finalRisk}
-                        onChange={(e) => handleOverrideRisk(tool.toolName, e.target.value)}
-                        className={`text-[9px] font-bold uppercase tracking-wider border rounded px-2.5 py-1 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-accent ${getRiskBadgeClass(tool.finalRisk)}`}
-                      >
-                        {riskLevels.map((lvl) => (
-                          <option key={lvl} value={lvl}>
-                            {lvl}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <select
+                      value={tool.finalRisk}
+                      onChange={(e) => handleOverrideRisk(tool.toolName, e.target.value)}
+                      className={`text-[10px] font-semibold uppercase tracking-wide bg-transparent focus:outline-none cursor-pointer ${getRiskTextColor(tool.finalRisk)}`}
+                    >
+                      {riskLevels.map((lvl) => (
+                        <option key={lvl} value={lvl}>{lvl}</option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               ))}

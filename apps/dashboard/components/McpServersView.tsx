@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Server, RefreshCw, Wrench, ShieldCheck, Terminal, Info, X, Radio, Play } from "lucide-react";
+import { Server, RefreshCw, Wrench, ShieldCheck, Terminal, X, Radio, Play, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,6 +21,7 @@ export function McpServersView({}: McpServersViewProps) {
   const queryClient = useQueryClient();
   const [selectedServer, setSelectedServer] = useState<McpServer | null>(null);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["mcp-topology"],
@@ -79,7 +80,32 @@ export function McpServersView({}: McpServersViewProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-foreground">MCP Servers</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold text-foreground">MCP Servers</h2>
+            <div className="relative"
+              onMouseEnter={() => setHelpOpen(true)}
+              onMouseLeave={() => setHelpOpen(false)}
+            >
+              <button className="p-1 rounded-lg text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30 transition-all duration-150">
+                <HelpCircle size={13} />
+              </button>
+              {helpOpen && (
+                <div className="absolute left-0 top-full mt-1 w-80 z-30 bg-card border border-border/70 rounded-xl shadow-2xl p-4 animate-in fade-in slide-in-from-top-1 duration-100">
+                  <p className="text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground mb-3">What is an MCP Server?</p>
+                  <div className="space-y-2.5 text-[10px] text-muted-foreground leading-relaxed">
+                    <p>Model Context Protocol (MCP) servers expose tools and resources that AI models can safely query or invoke. ArmorIQ dynamically registers these servers at runtime and applies safety, risk evaluation, and approval guardrails before any action execution.</p>
+                    <div>
+                      <p className="font-semibold text-foreground/70 mb-1">Supported transports:</p>
+                      <ul className="space-y-1 pl-1">
+                        <li><span className="font-mono font-semibold text-foreground/60">stdio</span> — Local process transport (e.g. node scripts).</li>
+                        <li><span className="font-mono font-semibold text-foreground/60">SSE</span> — Server-Sent Events over HTTP (e.g. remote services).</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
             Manage and monitor connected Model Context Protocol providers.
           </p>
@@ -220,27 +246,6 @@ export function McpServersView({}: McpServersViewProps) {
         </div>
       )}
 
-      <details className="group p-4 app-glass rounded-2xl [&_summary::-webkit-details-marker]:hidden border border-border">
-        <summary className="flex items-center justify-between text-xs font-mono font-semibold uppercase tracking-wider text-foreground cursor-pointer select-none">
-          <div className="flex items-center gap-2">
-            <Info size={14} className="text-accent" />
-            <span>What is an MCP Server?</span>
-          </div>
-          <span className="text-[10px] text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-        </summary>
-        <div className="mt-3 space-y-3 text-xs text-muted-foreground leading-relaxed">
-          <p>
-            Model Context Protocol (MCP) servers expose tools and resources that AI models can safely query or invoke. ArmorIQ dynamically registers these servers at runtime and applies safety, risk evaluation, and approval rule guardrails before any action execution.
-          </p>
-          <div className="space-y-1.5">
-            <p className="font-semibold text-foreground">Supported transports:</p>
-            <ul className="list-disc list-inside space-y-1 pl-1 font-medium">
-              <li><span className="font-semibold text-foreground font-mono">stdio:</span> Local process transport execution (e.g., node scripts).</li>
-              <li><span className="font-semibold text-foreground font-mono">SSE:</span> Server-Sent Events transport running over HTTP (e.g., remote services).</li>
-            </ul>
-          </div>
-        </div>
-      </details>
 
       <AnimatePresence>
         {selectedServer && (

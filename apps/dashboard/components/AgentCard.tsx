@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Conversation } from "./Conversation";
 import { PromptInput } from "./PromptInput";
-import { QuickTestScenarios } from "./QuickTestScenarios";
 import { ChatMessage } from "./MessageBubble";
 import { Bot } from "lucide-react";
 import { Terminal, FAQItem } from "./ui/terminal";
 
 const agentCommands = [
   "armoriq agent status",
-  "armoriq run --tool fetch-web --url \"https://api.github.com\"",
-  "armoriq policy check --action write_file --path \"/var/log/syslog\""
+  'armoriq run --tool fetch-web --url "https://api.github.com"',
+  'armoriq policy check --action write_file --path "/var/log/syslog"',
 ];
 
 const agentOutputs = {
@@ -24,28 +23,28 @@ const agentOutputs = {
   1: [
     "Evaluating URL request against network policies...",
     "Policy result: ALLOWED (fetch-web domain check passed)",
-    "Status code: 200 OK (payload: 1.2KB)"
+    "Status code: 200 OK (payload: 1.2KB)",
   ],
   2: [
     "Evaluating filesystem policy...",
     "Policy result: BLOCKED (write-access unauthorized for '/var/log/syslog')",
-    "Alert dispatched to Security Console."
-  ]
+    "Alert dispatched to Security Console.",
+  ],
 };
 
 const agentFAQs: FAQItem[] = [
   {
     q: "How do I check live agent connection status?",
-    cmd: "armoriq agent status"
+    cmd: "armoriq agent status",
   },
   {
     q: "Can the agent fetch data from external URLs?",
-    cmd: "armoriq run --tool fetch-web --url \"https://api.github.com\""
+    cmd: 'armoriq run --tool fetch-web --url "https://api.github.com"',
   },
   {
     q: "What happens if a tool modifies critical files?",
-    cmd: "armoriq policy check --action write_file --path \"/var/log/syslog\""
-  }
+    cmd: 'armoriq policy check --action write_file --path "/var/log/syslog"',
+  },
 ];
 
 export function AgentCard() {
@@ -106,7 +105,7 @@ export function AgentCard() {
       content: trimmed,
       createdAt: new Date(),
     };
-    
+
     setMessages((prev) => [...prev, userMsg]);
     setInputVal("");
     chatMutation.mutate(trimmed);
@@ -128,10 +127,27 @@ export function AgentCard() {
     chatMutation.mutate(prompt);
   }
 
+  useEffect(() => {
+    function onSelectPrompt(e: Event) {
+      handleSelectPrompt((e as CustomEvent).detail);
+    }
+    function onRunPrompt(e: Event) {
+      handleRunPrompt((e as CustomEvent).detail);
+    }
+    window.addEventListener("armoriq:select-prompt", onSelectPrompt);
+    window.addEventListener("armoriq:run-prompt", onRunPrompt);
+    return () => {
+      window.removeEventListener("armoriq:select-prompt", onSelectPrompt);
+      window.removeEventListener("armoriq:run-prompt", onRunPrompt);
+    };
+  }, [chatMutation.isPending]);
+
   return (
-    <div className="flex flex-col h-full min-h-[500px] bg-transparent rounded-2xl">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
-        <Bot size={16} className="text-accent" />
+    <div className="flex flex-col h-full min-h-[480px] bg-card/40 backdrop-blur-sm rounded-2xl border border-white/[0.02] shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_1px_2px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.04),0_4px_8px_rgba(0,0,0,0.04)] transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]">
+      <div className="flex items-center gap-2.5 mb-4 pb-3.5 border-b border-white/[0.04]">
+        <div className="p-1.5 rounded-lg bg-accent/10 border border-accent/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.03)]">
+          <Bot size={14} className="text-accent" strokeWidth={2} />
+        </div>
         <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
           AI Agent Console
         </h3>
@@ -152,24 +168,15 @@ export function AgentCard() {
         )}
       </div>
 
-      <div className="mb-6">
-        <QuickTestScenarios 
-          onSelectPrompt={handleSelectPrompt}
-          onRunPrompt={handleRunPrompt}
-          disabled={chatMutation.isPending} 
-        />
-      </div>
-
-      <div className="space-y-2">
-        <PromptInput 
+      <div className="space-y-2.5 pb-4">
+        <PromptInput
           value={inputVal}
           onChange={setInputVal}
           onSend={handleSend}
           disabled={chatMutation.isPending}
         />
-        
-        <p className="text-[10px] text-muted-foreground font-medium italic">
-          This chat interacts with the live AI agent. Tool calls are evaluated by the Policy Engine before execution.
+        <p className="text-[10px] text-muted-foreground/80 font-medium italic leading-relaxed">
+          Tool calls are evaluated by the Policy Engine before execution.
         </p>
       </div>
     </div>

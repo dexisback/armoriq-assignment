@@ -4,16 +4,16 @@ import { useEffect, useState, useMemo } from "react";
 import { Command } from "cmdk";
 import * as Dialog from "@radix-ui/react-dialog";
 import Fuse from "fuse.js";
-import { 
-  Search, 
-  LayoutDashboard, 
-  ShieldCheck, 
-  Wrench, 
-  Server, 
-  ClipboardCheck, 
-  FileCode2, 
+import {
+  Search,
+  LayoutDashboard,
+  ShieldCheck,
+  Wrench,
+  Server,
+  ClipboardCheck,
+  FileCode2,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { sound } from "./SoundSystem";
 
@@ -31,7 +31,11 @@ interface SearchItem {
   action: () => void;
 }
 
-export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearchModalProps) {
+export function CommandSearchModal({
+  isOpen,
+  onClose,
+  onNavigate,
+}: CommandSearchModalProps) {
   const [search, setSearch] = useState("");
   const [tools, setTools] = useState<any[]>([]);
   const [servers, setServers] = useState<any[]>([]);
@@ -85,49 +89,56 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
       {
         id: "nav-overview",
         title: "Overview Dashboard",
-        description: "View system overview metrics, runtime synchronization, and AI agent chat console.",
+        description:
+          "View system overview metrics, runtime synchronization, and AI agent chat console.",
         category: "Navigation",
         action: () => onNavigate("overview"),
       },
       {
         id: "nav-policies",
         title: "Policies & Guards",
-        description: "Configure block list tool rules, manual approval workflows, risk levels, and input validators.",
+        description:
+          "Configure block list tool rules, manual approval workflows, risk levels, and input validators.",
         category: "Navigation",
         action: () => onNavigate("policies"),
       },
       {
         id: "nav-catalog",
         title: "Tool Catalog",
-        description: "Browse registered MCP tools, inspect actions, and override execution risk configurations.",
+        description:
+          "Browse registered MCP tools, inspect actions, and override execution risk configurations.",
         category: "Navigation",
         action: () => onNavigate("catalog"),
       },
       {
         id: "nav-servers",
         title: "Connected MCP Servers",
-        description: "Manage connected servers, inspect network transports, and refresh dynamic tool discovery.",
+        description:
+          "Manage connected servers, inspect network transports, and refresh dynamic tool discovery.",
         category: "Navigation",
         action: () => onNavigate("servers"),
       },
       {
         id: "nav-approvals",
         title: "Approval Queue",
-        description: "Inspect intercepted tool executions and dynamic manual authorization actions.",
+        description:
+          "Inspect intercepted tool executions and dynamic manual authorization actions.",
         category: "Navigation",
         action: () => onNavigate("approvals"),
       },
       {
         id: "nav-logs",
         title: "Audit Trails",
-        description: "Examine security logs, Policy Engine decisions, and execution timelines.",
+        description:
+          "Examine security logs, Policy Engine decisions, and execution timelines.",
         category: "Navigation",
         action: () => onNavigate("logs"),
       },
       {
         id: "nav-playground",
         title: "Prompt Security Playground",
-        description: "Test prompt injection filters, security logs, and scan heuristics.",
+        description:
+          "Test prompt injection filters, security logs, and scan heuristics.",
         category: "Navigation",
         action: () => onNavigate("playground"),
       },
@@ -138,7 +149,9 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
       items.push({
         id: `tool-${t.id || t.toolName}`,
         title: `Tool: ${t.toolName}`,
-        description: t.description || `Exposed by server ${t.serverId}. Risk Level: ${t.finalRisk}.`,
+        description:
+          t.description ||
+          `Exposed by server ${t.serverId}. Risk Level: ${t.finalRisk}.`,
         category: "Tools",
         action: () => onNavigate("catalog"),
       });
@@ -171,7 +184,8 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
       items.push({
         id: `log-${l.id}`,
         title: `Audit: ${l.toolName} (${l.decision})`,
-        description: l.reason || `Tool execution audit event of type ${l.eventType}.`,
+        description:
+          l.reason || `Tool execution audit event of type ${l.eventType}.`,
         category: "Audit Logs",
         action: () => onNavigate("logs"),
       });
@@ -229,16 +243,30 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 transition-opacity" />
-        <Dialog.Content className="fixed top-[15%] left-[50%] -translate-x-[50%] w-full max-w-lg app-glass rounded-2xl z-50 overflow-hidden flex flex-col p-0">
+        <Dialog.Overlay className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 transition-[opacity,backdrop-filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <Dialog.Content
+          style={{
+            boxShadow:
+              "0 0 0 1px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.06)",
+          }}
+          className="fixed top-[15%] left-[50%] -translate-x-[50%] w-full max-w-lg app-glass rounded-2xl z-50 overflow-hidden flex flex-col p-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%] transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+        >
           <Command className="w-full flex flex-col" label="Smart Search">
-            <div className="flex items-center gap-2.5 px-4 border-b border-border bg-transparent">
-              <Search size={14} className="text-muted-foreground shrink-0" />
+            <div
+              style={{
+                boxShadow: "inset 0 -1px 0 0 rgba(0, 0, 0, 0.06)",
+              }}
+              className="flex items-center gap-2.5 px-4 bg-transparent"
+            >
+              <Search
+                size={14}
+                className="text-muted-foreground shrink-0 -mt-[1px]"
+              />
               <Command.Input
                 value={search}
                 onValueChange={setSearch}
                 placeholder="Search any page, tool, server, policy, or logs..."
-                className="w-full py-3.5 bg-transparent border-0 text-foreground text-xs font-semibold focus:outline-none placeholder:text-muted-foreground"
+                className="w-full py-3.5 bg-transparent border-0 text-foreground text-xs font-semibold focus:outline-none placeholder:text-muted-foreground transition-colors duration-150 ease-[cubic-bezier(0.2,0,0,1)]"
               />
             </div>
 
@@ -266,20 +294,33 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
                           item.action();
                           onClose();
                         }}
-                        className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-xs text-foreground cursor-pointer select-none transition-all hover:bg-muted/40 aria-selected:bg-accent aria-selected:text-accent-foreground group"
+                        style={{
+                          boxShadow: "0 0 0 1px transparent",
+                        }}
+                        className="flex items-center justify-between gap-3 px-3 py-2.5 min-h-[40px] rounded-xl text-xs text-foreground cursor-pointer select-none active:scale-[0.96] hover:bg-muted/40 hover:shadow-[0_0_0_1px_rgba(0,0,0,0.04)] aria-selected:bg-accent aria-selected:text-accent-foreground aria-selected:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_1px_2px_rgba(0,0,0,0.04)] transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="p-1.5 bg-background border border-border rounded-lg shrink-0 group-aria-selected:border-accent-foreground/20">
+                          <div
+                            style={{
+                              boxShadow: "inset 0 0 0 1px rgba(0, 0, 0, 0.06)",
+                            }}
+                            className="p-1.5 bg-background rounded-lg shrink-0 min-h-[28px] min-w-[28px] flex items-center justify-center group-aria-selected:shadow-[inset_0_0_0_1px_rgba(var(--accent-rgb),0.2)] transition-[box-shadow] duration-150 ease-[cubic-bezier(0.2,0,0,1)]"
+                          >
                             {getCategoryIcon(item.category)}
                           </div>
                           <div className="min-w-0">
-                            <span className="font-bold block truncate">{item.title}</span>
+                            <span className="font-bold block truncate">
+                              {item.title}
+                            </span>
                             <span className="text-[10px] text-muted-foreground block truncate group-aria-selected:text-accent-foreground/80 mt-0.5">
                               {item.description}
                             </span>
                           </div>
                         </div>
-                        <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-aria-selected:opacity-100 transition-opacity text-muted-foreground group-aria-selected:text-accent-foreground shrink-0" />
+                        <ArrowRight
+                          size={12}
+                          className="opacity-0 scale-75 blur-[2px] group-hover:opacity-100 group-hover:scale-100 group-hover:blur-0 group-aria-selected:opacity-100 group-aria-selected:scale-100 group-aria-selected:blur-0 transition-[opacity,transform,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)] text-muted-foreground group-aria-selected:text-accent-foreground shrink-0"
+                        />
                       </Command.Item>
                     ))}
                   </Command.Group>

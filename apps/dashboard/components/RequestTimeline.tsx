@@ -264,7 +264,7 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
 
       <div className="relative pl-6 space-y-6">
         {stages.map((stage, idx) => {
-          const isActive = stage.status === "Completed";
+          const isProcessed = stage.status === "Completed" || stage.status === "Failed";
           const isCurrent = stage.status === "Current";
           const isExpanded = expandedNodeIndex === idx;
           const firstDetail = Object.values(stage.details)[0] || "";
@@ -275,7 +275,7 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
               {idx < stages.length - 1 && (
                 <div 
                   className={`absolute left-[-19.5px] top-[14px] bottom-[-30px] w-[1px] z-0 transition-colors duration-200 ${
-                    isActive ? "bg-accent" : "bg-border"
+                    isProcessed ? "bg-accent" : "bg-border"
                   }`} 
                 />
               )}
@@ -283,10 +283,10 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
               {/* Marker (Square) */}
               <span 
                 className={`absolute left-[-24px] top-[4px] h-2.5 w-2.5 rounded-none z-10 transition-all duration-200 ${
-                  isActive 
+                  isProcessed
                     ? "bg-accent scale-110" 
                     : isCurrent 
-                    ? "bg-amber-500 animate-pulse scale-110" 
+                    ? "bg-accent/60 animate-pulse scale-110" 
                     : "bg-muted-foreground/30"
                 }`} 
               />
@@ -335,17 +335,6 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
         })}
       </div>
 
-      <div className="p-4 bg-muted/20 border border-border rounded-sm space-y-2">
-        <h5 className="text-[10px] font-mono font-bold uppercase text-foreground">How ArmorIQ Processes Requests</h5>
-        <ol className="text-[10px] text-muted-foreground space-y-1.5 list-decimal list-inside font-semibold leading-relaxed">
-          <li>User submits a prompt.</li>
-          <li>The LLM selects a tool.</li>
-          <li>The Policy Engine evaluates security rules.</li>
-          <li>The request is either allowed, blocked, or paused for approval.</li>
-          <li>Approved requests execute through the MCP Registry.</li>
-          <li>Every stage is recorded in the audit log.</li>
-        </ol>
-      </div>
     </div>
   );
 }
