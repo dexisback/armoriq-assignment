@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AgentCard } from "./AgentCard";
+import { SystemStatusPanel } from "./SystemStatusPanel";
 import { 
   ShieldCheck, 
   Wrench, 
   ClipboardCheck, 
-  FileCode2, 
-  Activity,
-  AlertTriangle,
-  Heart,
-  Clock
+  Activity
 } from "lucide-react";
 
 interface OverviewViewProps {
@@ -77,29 +74,12 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
   return (
     <div className="grid grid-cols-12 gap-8">
-      {/* Left Column (55% width approx) - AI Agent testing console */}
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-6">
         <AgentCard />
       </div>
 
-      {/* Right Column (45% width approx) - Control plane widgets */}
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-6">
-        
-        {/* System Health */}
-        <div className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-500/10 text-green-500 rounded-lg">
-              <Heart size={16} />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-foreground">Sandbox Security Health</h4>
-              <p className="text-[10px] text-muted-foreground mt-0.5">All MCP endpoints guarded by Policy Engine</p>
-            </div>
-          </div>
-          <span className="text-[9px] font-bold text-green-600 bg-green-500/10 px-2 py-0.5 border border-green-500/20 rounded uppercase tracking-wider">
-            Healthy
-          </span>
-        </div>
+        <SystemStatusPanel />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-4">
