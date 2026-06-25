@@ -5,10 +5,11 @@ import { Sidebar, TabType } from "../components/Sidebar";
 import { OverviewView } from "../components/OverviewView";
 import { PoliciesView } from "../components/PoliciesView";
 import { ToolCatalogView } from "../components/ToolCatalogView";
+import { McpServersView } from "../components/McpServersView";
 import { ApprovalQueueView } from "../components/ApprovalQueueView";
 import { AuditLogsView } from "../components/AuditLogsView";
 import { PromptPlaygroundView } from "../components/PromptPlaygroundView";
-import { Activity, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
@@ -21,6 +22,8 @@ export default function Home() {
         return "Policies & Guards";
       case "catalog":
         return "Discovered MCP Tools";
+      case "servers":
+        return "Connected MCP Servers";
       case "approvals":
         return "Action Approval Queue";
       case "logs":
@@ -38,7 +41,6 @@ export default function Home() {
       <Sidebar activeTab={activeTab} onChangeTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header Status Bar */}
         <header className="h-16 border-b border-border bg-card flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-4">
             <h2 className="text-sm font-bold text-foreground tracking-tight">
@@ -59,7 +61,6 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto p-8 relative">
           {activeTab === "overview" && (
             <OverviewView onNavigate={setActiveTab} />
@@ -69,6 +70,9 @@ export default function Home() {
           )}
           {activeTab === "catalog" && (
             <ToolCatalogView />
+          )}
+          {activeTab === "servers" && (
+            <McpServersView />
           )}
           {activeTab === "approvals" && (
             <ApprovalQueueView />

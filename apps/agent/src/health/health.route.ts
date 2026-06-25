@@ -3,6 +3,7 @@ import { prisma } from "@armoriq/db";
 import { Router } from "express";
 import { Redis } from "ioredis";
 import { MODELS, DEFAULT_PROVIDER, FALLBACK_PROVIDER } from "../lib/models.js";
+import { MCP_SERVERS } from "../config/mcp-servers.js";
 
 export const healthRouter = Router();
 
@@ -49,6 +50,7 @@ healthRouter.get(
         default: DEFAULT_PROVIDER,
         fallback: FALLBACK_PROVIDER,
       },
+      serversList: MCP_SERVERS,
     });
   }
 );
