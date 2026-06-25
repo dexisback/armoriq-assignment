@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, X, ClipboardCheck, AlertCircle, Clock } from "lucide-react";
+import { Check, X, ClipboardCheck, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { ApprovalDetailsDrawer } from "./ApprovalDetailsDrawer";
 
 export function ApprovalQueueView() {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [selectedApproval, setSelectedApproval] = useState<any | null>(null);
 
   async function fetchApprovals() {
     try {
@@ -35,13 +38,17 @@ export function ApprovalQueueView() {
       });
 
       if (res.ok) {
-        // Optimistically remove resolved request from list
         setApprovals(prev => prev.filter(a => a.id !== id));
+        if (action === "approve") {
+          toast.success("Approval approved successfully.");
+        } else {
+          toast.success("Approval rejected.");
+        }
       } else {
-        alert(`Failed to resolve: ${action}`);
+        toast.error(`Failed to resolve approval: ${action}`);
       }
     } catch (err) {
-      alert("Error resolving approval");
+      toast.error("Error resolving approval");
     } finally {
       setResolvingId(null);
     }
@@ -59,7 +66,6 @@ export function ApprovalQueueView() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h2 className="text-base font-bold text-foreground">Action Approval Queue</h2>
         <p className="text-xs text-muted-foreground mt-1">
@@ -80,7 +86,8 @@ export function ApprovalQueueView() {
           {approvals.map((approval) => (
             <div
               key={approval.id}
-              className="p-5 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-start justify-between gap-6 relative overflow-hidden"
+              onClick={() => setSelectedApproval(approval)}
+              className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 hover:bg-muted/10 transition-all flex flex-col md:flex-row md:items-start justify-between gap-6 relative overflow-hidden cursor-pointer group"
             >
               <div className="space-y-3 flex-1 min-w-0">
                 <div className="flex items-center gap-3">
@@ -108,11 +115,13 @@ export function ApprovalQueueView() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 shrink-0 self-end md:self-start">
+              <div className="flex items-center gap-3 shrink-0 self-end md:self-start z-10">
                 <button
                   disabled={resolvingId === approval.id}
-                  onClick={() => resolveApproval(approval.id, "reject")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resolveApproval(approval.id, "reject");
+                  }}
                   className="px-4 py-2 border border-red-500/20 hover:border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
                 >
                   <X size={14} />
@@ -120,7 +129,10 @@ export function ApprovalQueueView() {
                 </button>
                 <button
                   disabled={resolvingId === approval.id}
-                  onClick={() => resolveApproval(approval.id, "approve")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resolveApproval(approval.id, "approve");
+                  }}
                   className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
                 >
                   <Check size={14} />
@@ -131,6 +143,17 @@ export function ApprovalQueueView() {
           ))}
         </div>
       )}
+
+      {selectedApproval && (
+        <ApprovalDetailsDrawer
+          approval={selectedApproval}
+          onClose={() => setSelectedApproval(null)}
+          onSuccess={() => {
+            fetchApprovals();
+          }}
+        />
+      )}
     </div>
   );
 }
+

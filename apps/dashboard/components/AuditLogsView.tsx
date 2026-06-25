@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Info, X, ShieldAlert, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Search, Info, X, ShieldAlert, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ApprovalDetailsDrawer } from "./ApprovalDetailsDrawer";
 
 export function AuditLogsView() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -9,6 +10,7 @@ export function AuditLogsView() {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
+  const [viewingApproval, setViewingApproval] = useState<any | null>(null);
 
   async function fetchLogs() {
     try {
@@ -249,19 +251,50 @@ export function AuditLogsView() {
               )}
 
               {/* Extra stats */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] text-muted-foreground border-t border-border pt-4">
-                {selectedLog.conversationId && (
+              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[10px] text-muted-foreground border-t border-border pt-4">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                  {selectedLog.conversationId && (
+                    <div>
+                      Conversation: <span className="font-mono text-foreground">{selectedLog.conversationId}</span>
+                    </div>
+                  )}
                   <div>
-                    Conversation: <span className="font-mono text-foreground">{selectedLog.conversationId}</span>
+                    Logged At: <span className="text-foreground">{new Date(selectedLog.createdAt).toLocaleString()}</span>
                   </div>
-                )}
-                <div>
-                  Logged At: <span className="text-foreground">{new Date(selectedLog.createdAt).toLocaleString()}</span>
                 </div>
+                {selectedLog.trace?.approvalId && (
+                  <button
+                    onClick={() => {
+                      const approvalObj = {
+                        id: selectedLog.trace.approvalId,
+                        toolName: selectedLog.toolName,
+                        arguments: selectedLog.arguments,
+                        status: selectedLog.eventType === "APPROVAL_APPROVED" ? "APPROVED" : selectedLog.eventType === "APPROVAL_REJECTED" ? "REJECTED" : "PENDING",
+                        requestedAt: selectedLog.createdAt,
+                        resolvedAt: selectedLog.eventType === "APPROVAL_APPROVED" || selectedLog.eventType === "APPROVAL_REJECTED" ? selectedLog.createdAt : undefined,
+                        resolutionReason: selectedLog.eventType === "APPROVAL_REJECTED" ? "Rejected by administrator" : selectedLog.eventType === "APPROVAL_APPROVED" ? "Approved by administrator" : undefined
+                      };
+                      setViewingApproval(approvalObj);
+                    }}
+                    className="px-3 py-1.5 border border-accent/25 hover:border-accent/40 bg-accent/5 hover:bg-accent/10 text-accent text-[10px] font-bold rounded-lg cursor-pointer transition-colors"
+                  >
+                    View Approval Details
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
+      )}
+
+      {viewingApproval && (
+        <ApprovalDetailsDrawer
+          approval={viewingApproval}
+          onClose={() => setViewingApproval(null)}
+          onSuccess={() => {
+            fetchLogs();
+          }}
+        />
       )}
     </div>
   );
