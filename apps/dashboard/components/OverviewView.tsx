@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AgentCard } from "./AgentCard";
 import { SystemStatusPanel } from "./SystemStatusPanel";
 import { RequestTimeline } from "./RequestTimeline";
+import { ArchitectureOverviewWidget } from "./ArchitectureOverviewWidget";
 import { 
   ShieldCheck, 
   Wrench, 
@@ -211,6 +212,10 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
           )}
         </div>
 
+      </div>
+
+      <div className="col-span-12 border-t border-border pt-8 mt-4">
+        <ArchitectureOverviewWidget />
       </div>
     </div>
   );
