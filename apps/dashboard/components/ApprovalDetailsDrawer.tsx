@@ -143,7 +143,7 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
           initial={{ x: "100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 220 }}
+          transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20 }}
           className="relative w-full sm:max-w-md md:max-w-lg app-glass border-y-0 border-r-0 h-full flex flex-col shadow-2xl z-10 overflow-hidden"
         >
           <div className="h-16 border-b border-border bg-transparent flex items-center justify-between px-6 shrink-0">

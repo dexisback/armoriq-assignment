@@ -13,75 +13,50 @@ interface SubsystemCardProps {
   metrics?: { label: string; value: string | number }[];
 }
 
-function SubsystemCard({ name, status, description, icon: Icon, state, metrics }: SubsystemCardProps) {
+function SubsystemCard({ name, status, icon: Icon, state, metrics }: SubsystemCardProps) {
   const badgeColors = {
-    healthy: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-    error: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
-    unknown: "bg-stone-500/10 text-stone-500 border border-stone-500/20",
+    healthy: "text-emerald-500",
+    warning: "text-amber-500",
+    error: "text-rose-500",
+    unknown: "text-stone-500",
   };
 
   const dotColors = {
-    healthy: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
-    warning: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]",
-    error: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
+    healthy: "bg-emerald-500",
+    warning: "bg-amber-500",
+    error: "bg-rose-500",
     unknown: "bg-stone-500",
   };
 
-  return (
-    <div className="p-3.5 bg-card border border-border rounded-xl flex flex-col justify-between gap-3 shadow-sm hover:border-accent/40 transition-colors">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-background border border-border rounded-lg text-muted-foreground group-hover:text-foreground">
-              <Icon size={13} />
-            </div>
-            <span className="text-[11px] font-bold text-foreground truncate">{name}</span>
-          </div>
-          <span className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${badgeColors[state]}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${dotColors[state]} animate-pulse`} />
-            {status}
-          </span>
-        </div>
-        <p className="text-[10px] text-muted-foreground leading-normal min-h-[32px] line-clamp-2">
-          {description}
-        </p>
-      </div>
+  const metricText = metrics && metrics.length > 0 ? metrics[metrics.length - 1].value : "";
 
-      {metrics && metrics.length > 0 && (
-        <div className="border-t border-border pt-2 grid grid-cols-2 gap-2 text-[9px] font-mono">
-          {metrics.map((m, idx) => (
-            <div key={idx} className="truncate">
-              <span className="text-muted-foreground block uppercase text-[8px]">{m.label}</span>
-              <span className="font-semibold text-foreground truncate">{m.value}</span>
-            </div>
-          ))}
-        </div>
-      )}
+  return (
+    <div className="flex items-center justify-between py-2 text-xs border-b border-border/40 last:border-0">
+      <div className="flex items-center gap-2 min-w-0">
+        <Icon size={12} className="text-muted-foreground shrink-0" />
+        <span className="font-semibold text-foreground truncate text-[11px]">{name}</span>
+        {metricText !== "" && metricText !== undefined && (
+          <span className="text-[8px] font-mono text-muted-foreground px-1 bg-muted rounded border border-border/20">
+            {metricText}
+          </span>
+        )}
+      </div>
+      <span className={`inline-flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-wider ${badgeColors[state]}`}>
+        <span className={`h-1 w-1 rounded-full ${dotColors[state]}`} />
+        {status}
+      </span>
     </div>
   );
 }
 
 function SubsystemSkeleton() {
   return (
-    <div className="p-3.5 bg-card border border-border rounded-xl flex flex-col justify-between gap-4 animate-pulse">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-muted rounded-lg" />
-            <div className="w-16 h-3 bg-muted rounded" />
-          </div>
-          <div className="w-12 h-4 bg-muted rounded-full" />
-        </div>
-        <div className="space-y-1.5">
-          <div className="w-full h-2.5 bg-muted rounded" />
-          <div className="w-4/5 h-2.5 bg-muted rounded" />
-        </div>
+    <div className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 animate-pulse">
+      <div className="flex items-center gap-2">
+        <div className="w-3.5 h-3.5 bg-muted rounded" />
+        <div className="w-16 h-3 bg-muted rounded" />
       </div>
-      <div className="border-t border-border pt-2 grid grid-cols-2 gap-2">
-        <div className="w-12 h-3 bg-muted rounded" />
-        <div className="w-12 h-3 bg-muted rounded" />
-      </div>
+      <div className="w-12 h-3.5 bg-muted rounded-full" />
     </div>
   );
 }
@@ -186,12 +161,11 @@ export function SystemStatusPanel() {
       icon: Server,
       state: error ? "error" as const : (health ? "healthy" as const : "unknown" as const),
       metrics: [
-        { label: "Servers", value: mcpServers },
-        { label: "Tools", value: mcpTools },
+        { label: "Servers", value: `${mcpServers} Svr` },
       ],
     },
     {
-      name: "Redis",
+      name: "Redis Sync",
       status: error ? "Offline" : (redisStatus === "healthy" ? "Connected" : redisStatus === "warning" ? "Warning" : "Unknown"),
       description: "Pub/Sub layer synchronizing security policy updates instantly.",
       icon: Radio,
@@ -207,49 +181,37 @@ export function SystemStatusPanel() {
       icon: Zap,
       state: error ? "error" as const : (health?.models?.gemini ? "healthy" as const : "unknown" as const),
       metrics: [
-        { label: "Provider", value: health?.providers?.default || "Gemini" },
-        { label: "Model", value: health?.models?.gemini || "gemini-2.5-flash" },
-      ],
-    },
-    {
-      name: "Groq Fallback",
-      status: error ? "Offline" : (health?.models?.groq ? "Ready" : "Unknown"),
-      description: "Secondary model provider for redundancy in case of primary API outages.",
-      icon: Zap,
-      state: error ? "error" as const : (health?.models?.groq ? "healthy" as const : "unknown" as const),
-      metrics: [
-        { label: "Provider", value: health?.providers?.fallback || "Groq" },
-        { label: "Model", value: health?.models?.groq || "llama-3.3-70b-versatile" },
+        { label: "Model", value: "gemini-2.5" },
       ],
     },
   ];
 
   return (
-    <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col gap-4">
-      <div className="flex items-center justify-between border-b border-border pb-3 shrink-0">
+    <div className="flex flex-col gap-3 text-foreground select-none">
+      <div className="flex items-center justify-between border-b border-border pb-2 shrink-0">
         <div>
-          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+          <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-foreground">
             System Status
           </h4>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Live Runtime Health</p>
+          <p className="text-[9px] text-muted-foreground mt-0.5">Live Health Monitor</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[9px] font-mono text-muted-foreground">
-            {secondsAgo === 0 ? "Just updated" : `${secondsAgo}s ago`}
+        <div className="flex items-center gap-2">
+          <span className="text-[8px] font-mono text-muted-foreground">
+            {secondsAgo === 0 ? "Just now" : `${secondsAgo}s ago`}
           </span>
           <button
             onClick={handleManualRefresh}
             disabled={isFetching}
-            className="p-1.5 border border-border hover:border-accent/40 bg-background hover:bg-muted/40 text-muted-foreground hover:text-foreground rounded-lg cursor-pointer transition-all disabled:opacity-50"
+            className="p-1 hover:border-accent/40 hover:bg-muted/40 text-muted-foreground hover:text-foreground rounded transition-all disabled:opacity-50 cursor-pointer"
             title="Refresh Status"
           >
-            <RefreshCw size={12} className={isFetching ? "animate-spin" : ""} />
+            <RefreshCw size={11} className={isFetching ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
       {isLoading && !data ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex flex-col">
           {Array.from({ length: 6 }).map((_, idx) => (
             <SubsystemSkeleton key={idx} />
           ))}
@@ -257,15 +219,15 @@ export function SystemStatusPanel() {
       ) : (
         <>
           {error && (
-            <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-xl flex items-start gap-2 text-[10px] text-rose-500">
-              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+            <div className="p-2 bg-rose-500/5 border border-rose-500/10 rounded flex items-start gap-1.5 text-[9px] text-rose-500 leading-normal">
+              <AlertCircle size={12} className="shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold">Operational Alert:</span> Health monitoring connection issues. Status indicators may reflect cached or partial states.
+                Connection issue. Status may be cached.
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col">
             {subsystems.map((sub) => (
               <SubsystemCard
                 key={sub.name}
@@ -279,32 +241,11 @@ export function SystemStatusPanel() {
             ))}
           </div>
 
-          <div className="border-t border-border pt-4 mt-2">
-            <h5 className="text-[10px] font-mono font-bold uppercase text-foreground mb-2">
-              ArmorIQ Runtime Summary
-            </h5>
-            <ul className="text-[10px] text-muted-foreground space-y-1.5 font-semibold">
-              <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${error ? "bg-rose-500" : "bg-emerald-500"}`} />
-                AI Agent {error ? "offline or unreachable" : "running normally"}
-              </li>
-              <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dbStatus === "error" || error ? "bg-rose-500" : "bg-emerald-500"}`} />
-                Prisma & Postgres Connection {dbStatus === "healthy" && !error ? "Active" : "Disconnected"}
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-                Policy Engine loaded ({activeRulesCount} rules loaded)
-              </li>
-              <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${redisStatus === "warning" || error ? "bg-amber-500" : "bg-emerald-500"}`} />
-                Runtime synchronization {redisStatus === "healthy" && !error ? "active" : "degraded (warning)"}
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-                Ready to evaluate actions and process AI tool requests
-              </li>
-            </ul>
+          <div className="border-t border-border pt-2 mt-1">
+            <div className="flex justify-between items-center text-[9px] font-mono text-muted-foreground">
+              <span>ACTIVE GUARDS</span>
+              <span className="font-semibold text-foreground">{activeRulesCount} loaded</span>
+            </div>
           </div>
         </>
       )}

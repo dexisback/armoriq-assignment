@@ -1,38 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(0.962 0.008 78);
-  --foreground: oklch(0.205 0.0085 78);
-  --card: oklch(0.997 0.0032 78);
-  --card-foreground: oklch(0.205 0.0085 78);
-  --muted: oklch(0.898 0.008 78);
-  --muted-foreground: oklch(0.485 0.012 75);
-  --cta: oklch(0.633 0.068 54);
-  --cta-foreground: oklch(0.986 0.014 82);
+  --background: #fafaf9;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --cta: #D15E41;
+  --cta-foreground: #ffffff;
   --accent: var(--cta);
   --accent-foreground: var(--cta-foreground);
   --ring: var(--cta);
-  --border: oklch(0.898 0.008 78);
-  --popover: oklch(0.997 0.0032 78);
-  --panel-texture-bg: oklch(0.997 0.0032 78);
+  --border: #e4e4e7;
+  --popover: #ffffff;
+  --panel-texture-bg: #ffffff;
   --panel-texture-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
 }
 
 .dark {
-  --background: oklch(0.21 0.022 265);
-  --foreground: oklch(0.962 0.006 78);
-  --card: oklch(0.238 0.018 268);
-  --card-foreground: oklch(0.962 0.006 78);
-  --muted: oklch(0.35 0.02 268);
-  --muted-foreground: oklch(0.68 0.014 78);
-  --cta: oklch(0.652 0.072 54);
-  --cta-foreground: oklch(0.98 0.012 82);
+  --background: #050507;
+  --foreground: #fafafa;
+  --card: #0a0a0c;
+  --card-foreground: #fafafa;
+  --muted: #121217;
+  --muted-foreground: #a1a1aa;
+  --cta: #D15E41;
+  --cta-foreground: #ffffff;
   --accent: var(--cta);
   --accent-foreground: var(--cta-foreground);
   --ring: var(--cta);
-  --border: oklch(0.35 0.02 268);
-  --popover: oklch(0.238 0.018 268);
-  --panel-texture-bg: oklch(0.238 0.018 268);
+  --border: #1e1e24;
+  --popover: #0a0a0c;
+  --panel-texture-bg: #0a0a0c;
   --panel-texture-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
@@ -50,26 +50,35 @@
   --font-sans: var(--font-inter);
   --color-cta: var(--cta);
   --color-cta-foreground: var(--cta-foreground);
+  --radius-3xl: 6px;
+  --radius-2xl: 4px;
+  --radius-xl: 3px;
+  --radius-lg: 2px;
+  --radius-md: 2px;
+  --radius-sm: 1px;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   background-image:
-    radial-gradient(circle, rgba(0, 0, 0, 0.18) 1.2px, transparent 1.2px),
-    radial-gradient(circle, rgba(200, 160, 120, 0.32) 1.5px, transparent 1.5px);
-  background-size: 20px 20px, 80px 80px;
-  background-position: 0 0, 14px 24px;
+    linear-gradient(to right, var(--border) 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, var(--border) 0.5px, transparent 0.5px),
+    repeating-linear-gradient(-45deg, var(--border) 0px, var(--border) 0.5px, transparent 0.5px, transparent 16px),
+    var(--panel-texture-image);
+  background-size: 80px 80px, 80px 80px, 100% 100%, 200px 200px;
+  background-position: 0 0, 0 0, 0 0, 0 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .dark body {
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.22) 1.2px, transparent 1.2px),
-    radial-gradient(circle, rgba(219, 138, 116, 0.35) 1.5px, transparent 1.5px);
-  background-size: 20px 20px, 80px 80px;
-  background-position: 0 0, 14px 24px;
+    linear-gradient(to right, var(--border) 0.5px, transparent 0.5px),
+    linear-gradient(to bottom, var(--border) 0.5px, transparent 0.5px),
+    repeating-linear-gradient(-45deg, var(--border) 0px, var(--border) 0.5px, transparent 0.5px, transparent 16px),
+    var(--panel-texture-image);
+  background-size: 80px 80px, 80px 80px, 100% 100%, 200px 200px;
 }
 
 .app-surface {
@@ -157,4 +166,31 @@ body {
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.app-card-3d {
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 
+    0 1px 2px rgba(22, 25, 37, 0.03),
+    0 4px 12px rgba(22, 25, 37, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.dark .app-card-3d {
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.app-card-3d:hover {
+  border-color: color-mix(in oklch, var(--border) 70%, var(--cta) 30%);
+}
+
+.dark .app-card-3d:hover {
+  border-color: color-mix(in oklch, var(--border) 70%, var(--cta) 30%);
+}
+
+.app-card-3d:active {
+  transition-duration: 80ms;
 }

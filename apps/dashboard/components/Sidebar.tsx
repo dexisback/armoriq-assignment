@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 export type TabType = "overview" | "policies" | "catalog" | "approvals" | "logs" | "playground" | "servers" | "demo";
 
@@ -113,35 +113,37 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
 
   const itemVariants = {
     hidden: { opacity: 0, x: -6, filter: "blur(2px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 350, damping: 26 } },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { type: "spring" as const, mass: 1.2, stiffness: 180, damping: 20 } },
   };
 
   return (
     <motion.aside
-      animate={{ width: isCollapsed ? 64 : 256 }}
-      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      animate={{ width: isCollapsed ? 56 : 192 }}
+      transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20 }}
       className="h-screen border-r border-border bg-card/75 backdrop-blur-md flex flex-col shrink-0 relative z-30"
     >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-6 z-50 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-muted/80 transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
+        className="absolute -right-3 top-4 z-50 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-muted/80 transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
       >
         {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
 
-      <div className="h-16 flex items-center px-6 border-b border-border overflow-hidden select-none shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center text-accent-foreground font-bold text-sm shadow-sm shrink-0">
-            AQ
-          </div>
+      <div className="h-12 flex items-center px-4 border-b border-border overflow-hidden select-none shrink-0">
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/logo.png"
+            alt="ArmorIQ Logo"
+            className="h-6 w-6 object-contain rounded shadow-sm shrink-0"
+          />
           {!isCollapsed && (
             <motion.div
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
             >
-              <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">Armoriq</h1>
-              <p className="text-[10px] text-muted-foreground mt-0.5">MCP Guardrail Engine</p>
+              <h1 className="font-bold text-xs tracking-tight text-foreground leading-none">Armoriq</h1>
+              <p className="text-[9px] text-muted-foreground mt-0.5">MCP Guardrail</p>
             </motion.div>
           )}
         </div>
@@ -151,9 +153,9 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto no-scrollbar"
+        className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar"
       >
-        {menuItems.map((item) => {
+        {menuItems.map((item, idx) => {
           const isActive = activeTab === item.id;
 
           return (
@@ -162,20 +164,26 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
               variants={itemVariants}
               whileTap={{ scale: 0.96 }}
               onClick={() => onChangeTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium tracking-wide transition-all duration-150 cursor-pointer group relative outline-none ${
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium tracking-wide transition-all duration-150 cursor-pointer group relative outline-none ${
                 isActive
                   ? "bg-accent text-accent-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
               }`}
             >
-              <div className="flex h-5 w-5 items-center justify-center shrink-0">
+              <div className="flex h-4 w-4 items-center justify-center shrink-0">
                 {item.icon(isActive)}
               </div>
               {!isCollapsed && (
                 <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, x: -8, filter: "blur(1px)" }}
+                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  transition={{
+                    type: "spring",
+                    mass: 1.2,
+                    stiffness: 180,
+                    damping: 20,
+                    delay: idx * 0.03,
+                  }}
                   className="truncate"
                 >
                   {item.label}
@@ -186,11 +194,39 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
         })}
       </motion.nav>
 
-      <div className="p-4 border-t border-border bg-muted/10 text-center truncate select-none shrink-0">
-        <p className="text-[9px] text-muted-foreground font-mono">
-          {isCollapsed ? "v0.1" : "v0.1.0-alpha"}
-        </p>
-      </div>
+      {isCollapsed ? (
+        <div className="px-2 pb-3 shrink-0 flex justify-center">
+          <button
+            onClick={() => {
+              onChangeTab("policies");
+              setTimeout(() => {
+                const event = new CustomEvent("open-new-policy-modal");
+                window.dispatchEvent(event);
+              }, 80);
+            }}
+            className="h-8 w-8 flex items-center justify-center bg-accent text-accent-foreground rounded-lg hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer shadow-sm"
+            title="New Policy"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+      ) : (
+        <div className="px-3 pb-3 shrink-0">
+          <button
+            onClick={() => {
+              onChangeTab("policies");
+              setTimeout(() => {
+                const event = new CustomEvent("open-new-policy-modal");
+                window.dispatchEvent(event);
+              }, 80);
+            }}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-accent text-accent-foreground rounded-lg text-xs font-semibold hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer shadow-sm uppercase tracking-wider font-mono text-[9px]"
+          >
+            <Plus size={11} />
+            <span>New Policy</span>
+          </button>
+        </div>
+      )}
     </motion.aside>
   );
 }

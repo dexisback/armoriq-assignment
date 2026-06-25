@@ -37,7 +37,7 @@ export function DemoGuideView() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 350, damping: 28 }}
+          transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20 }}
           className="col-span-12 lg:col-span-7 p-6 rounded-2xl app-glass app-surface flex flex-col justify-between gap-6"
         >
           <div>
@@ -51,13 +51,15 @@ export function DemoGuideView() {
             {capabilities.map((cap, idx) => {
               const Icon = cap.icon;
               return (
-                <div key={idx} className="p-4 rounded-xl bg-card/60 border border-border flex flex-col gap-3">
+                <div key={idx} className="group p-4 rounded-lg bg-card/60 border border-border flex flex-col gap-3 cursor-pointer">
                   <div className="p-1.5 w-fit bg-background border border-border rounded-lg text-accent">
                     <Icon size={14} />
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-xs font-bold text-foreground leading-snug">{cap.title}</h4>
-                    <p className="text-[10px] text-muted-foreground leading-normal">{cap.description}</p>
+                    <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
+                      <p className="text-[10px] text-muted-foreground leading-normal pt-1.5">{cap.description}</p>
+                    </div>
                   </div>
                 </div>
               );
@@ -68,7 +70,7 @@ export function DemoGuideView() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 350, damping: 28, delay: 0.05 }}
+          transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20, delay: 0.05 }}
           className="col-span-12 lg:col-span-5 p-6 rounded-2xl app-glass flex flex-col justify-between gap-4"
         >
           <div>
@@ -91,7 +93,7 @@ export function DemoGuideView() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 350, damping: 28, delay: 0.1 }}
+          transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20, delay: 0.1 }}
           className="col-span-12 p-6 rounded-2xl app-glass app-surface"
         >
           <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-accent">Process Topology</span>

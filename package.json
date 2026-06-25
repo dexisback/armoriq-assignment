@@ -11,7 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx scripts/seed.ts",
     "test:agent": "tsx scripts/test-agent.ts",
-    "dev:agent": "...",
+    "dev:agent": "pnpm --filter @armoriq/agent dev",
     "dev:dashboard": "pnpm --filter dashboard dev",
     "dev": "concurrently \"pnpm dev:agent\" \"pnpm dev:dashboard\""
     
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/ws": "^8.5.10",
+    "concurrently": "^10.0.3",
     "prisma": "^7.8.0",
     "tsx": "^4.20.5",
     "typescript": "^5.8.3"

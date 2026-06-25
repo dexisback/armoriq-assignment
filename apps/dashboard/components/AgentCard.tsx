@@ -7,6 +7,46 @@ import { PromptInput } from "./PromptInput";
 import { QuickTestScenarios } from "./QuickTestScenarios";
 import { ChatMessage } from "./MessageBubble";
 import { Bot } from "lucide-react";
+import { Terminal, FAQItem } from "./ui/terminal";
+
+const agentCommands = [
+  "armoriq agent status",
+  "armoriq run --tool fetch-web --url \"https://api.github.com\"",
+  "armoriq policy check --action write_file --path \"/var/log/syslog\""
+];
+
+const agentOutputs = {
+  0: [
+    "Agent backend status: ACTIVE",
+    "Connected to client on port 4000",
+    "Evaluated 28 policy requests in last 24h",
+  ],
+  1: [
+    "Evaluating URL request against network policies...",
+    "Policy result: ALLOWED (fetch-web domain check passed)",
+    "Status code: 200 OK (payload: 1.2KB)"
+  ],
+  2: [
+    "Evaluating filesystem policy...",
+    "Policy result: BLOCKED (write-access unauthorized for '/var/log/syslog')",
+    "Alert dispatched to Security Console."
+  ]
+};
+
+const agentFAQs: FAQItem[] = [
+  {
+    q: "How do I check live agent connection status?",
+    cmd: "armoriq agent status"
+  },
+  {
+    q: "Can the agent fetch data from external URLs?",
+    cmd: "armoriq run --tool fetch-web --url \"https://api.github.com\""
+  },
+  {
+    q: "What happens if a tool modifies critical files?",
+    cmd: "armoriq policy check --action write_file --path \"/var/log/syslog\""
+  }
+];
 
 export function AgentCard() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -97,8 +137,19 @@ export function AgentCard() {
         </h3>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 mb-4">
-        <Conversation messages={messages} loading={chatMutation.isPending} />
+      <div className="flex-1 flex flex-col min-h-0 mb-4 justify-center">
+        {messages.length <= 1 ? (
+          <Terminal
+            commands={agentCommands}
+            outputs={agentOutputs}
+            faqList={agentFAQs}
+            onSelectFAQ={(item) => handleRunPrompt(item.q)}
+            username="ArmorIQ-Agent"
+            className="w-full max-w-2xl px-0 shadow-none border-0"
+          />
+        ) : (
+          <Conversation messages={messages} loading={chatMutation.isPending} />
+        )}
       </div>
 
       <div className="mb-6">

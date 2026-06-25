@@ -135,63 +135,50 @@ export function QuickTestScenarios({ onSelectPrompt, onRunPrompt, disabled }: Qu
           return (
             <div
               key={sc.id}
-              onMouseEnter={() => setHoveredId(sc.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className={`p-3.5 border rounded-xl flex flex-col justify-between gap-3 transition-all relative overflow-hidden group ${getAccentClass(
+              className={`p-3 border rounded-lg flex flex-col justify-between gap-3 transition-all relative overflow-hidden group cursor-pointer ${getAccentClass(
                 sc.accent
               )}`}
             >
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <IconComp size={14} className="shrink-0" />
+                    <IconComp size={13} className="shrink-0" />
                     <span className="text-xs font-semibold text-foreground truncate">{sc.title}</span>
                   </div>
                   <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider ${getBadgeClass(sc.badge)}`}>
                     {sc.badge}
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground leading-normal line-clamp-2">
-                  {sc.description}
-                </p>
+                
+                <div className="max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden space-y-1.5">
+                  <p className="text-[10px] text-muted-foreground leading-normal pt-1">
+                    {sc.description}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground leading-relaxed italic border-t border-border/40 pt-1">
+                    {sc.explanation}
+                  </p>
+                </div>
               </div>
 
               <div className="flex items-center justify-between gap-2 mt-1 z-10">
                 <button
                   type="button"
                   disabled={disabled}
-                  onClick={() => onSelectPrompt(sc.prompt)}
-                  className="px-2.5 py-1 text-[9px] font-semibold bg-background border border-border hover:border-accent/40 text-foreground rounded-lg cursor-pointer transition-colors"
+                  onClick={(e) => { e.stopPropagation(); onSelectPrompt(sc.prompt); }}
+                  className="px-2.5 py-1 text-[9px] font-semibold bg-background border border-border hover:border-accent/40 text-foreground rounded-lg cursor-pointer transition-colors active:scale-[0.96]"
                 >
                   Try
                 </button>
                 <button
                   type="button"
                   disabled={disabled}
-                  onClick={() => onRunPrompt(sc.prompt)}
-                  className="p-1 bg-accent text-accent-foreground rounded-lg cursor-pointer transition-transform active:scale-95 flex items-center justify-center"
+                  onClick={(e) => { e.stopPropagation(); onRunPrompt(sc.prompt); }}
+                  className="p-1.5 bg-accent text-accent-foreground rounded-lg cursor-pointer transition-transform active:scale-[0.96] flex items-center justify-center"
                   title="Run Immediately"
                 >
                   <Play size={10} fill="currentColor" />
                 </button>
               </div>
-
-              {hoveredId === sc.id && (
-                <div className="absolute inset-0 bg-popover border border-border p-3.5 rounded-xl z-20 flex flex-col justify-between animate-in fade-in zoom-in-95 duration-150">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1 text-[10px] font-semibold text-foreground">
-                      <Info size={11} className="text-accent" />
-                      Hover Information
-                    </div>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">
-                      {sc.explanation}
-                    </p>
-                  </div>
-                  <div className="text-[9px] font-mono text-accent font-semibold truncate pt-1">
-                    Prompt: "{sc.prompt}"
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}

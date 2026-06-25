@@ -74,15 +74,66 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
   if (loading && metrics.toolsCount === 0 && recentLogs.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center justify-center gap-3 p-8 rounded-2xl app-glass bg-card/45 relative overflow-hidden animate-pulse max-w-sm w-full">
-          <div className="absolute inset-0 app-hatch opacity-[0.05]" />
-          <div className="relative flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full border-[3px] border-accent/25 border-t-accent animate-spin" />
+      <div className="grid grid-cols-12 gap-6 animate-pulse select-none">
+        {/* Left Column Skeleton */}
+        <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+          {/* AI Agent Console Skeleton */}
+          <div className="p-5 rounded-lg border border-border/45 bg-card/25 h-[230px] flex flex-col gap-4 relative overflow-hidden">
+            <div className="absolute inset-0 app-hatch opacity-[0.03]" />
+            <div className="h-4 bg-muted/65 rounded w-1/4 animate-pulse" />
+            <div className="flex-1 bg-muted/40 rounded-sm" />
+            <div className="h-9 bg-muted/65 rounded-sm" />
           </div>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-            Synchronizing Security Plane...
-          </span>
+
+          {/* Request Timeline Skeleton */}
+          <div className="p-5 rounded-lg border border-border/45 bg-card/25 h-[350px] flex flex-col gap-5">
+            <div className="h-4 bg-muted/65 rounded w-1/5 animate-pulse" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="flex gap-4">
+                  <div className="w-2.5 h-2.5 bg-muted/50 shrink-0 mt-1" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 bg-muted/65 rounded w-1/3" />
+                    <div className="h-3 bg-muted/40 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column Skeleton */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+          {/* Metrics Skeleton */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg border border-border/45 bg-card/25 h-[95px] flex flex-col gap-3">
+              <div className="h-3 bg-muted/65 rounded w-1/2" />
+              <div className="h-6 bg-muted/65 rounded w-1/3" />
+            </div>
+            <div className="p-4 rounded-lg border border-border/45 bg-card/25 h-[95px] flex flex-col gap-3">
+              <div className="h-3 bg-muted/65 rounded w-1/2" />
+              <div className="h-6 bg-muted/65 rounded w-1/3" />
+            </div>
+          </div>
+
+          {/* Pending Approvals Skeleton */}
+          <div className="p-5 rounded-lg border border-border/45 bg-card/25 h-[180px] flex flex-col gap-4">
+            <div className="h-3.5 bg-muted/65 rounded w-1/2" />
+            <div className="space-y-3">
+              <div className="h-10 bg-muted/40 rounded" />
+              <div className="h-10 bg-muted/40 rounded" />
+            </div>
+          </div>
+
+          {/* Recent Interceptions Skeleton */}
+          <div className="p-5 rounded-lg border border-border/45 bg-card/25 h-[230px] flex flex-col gap-4">
+            <div className="h-3.5 bg-muted/65 rounded w-1/2" />
+            <div className="space-y-3">
+              <div className="h-9 bg-muted/40 rounded" />
+              <div className="h-9 bg-muted/40 rounded" />
+              <div className="h-9 bg-muted/40 rounded" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -90,31 +141,27 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
   return (
     <div className="grid grid-cols-12 gap-6 animate-in fade-in duration-300">
+      {/* Left Column (AI Agent Console and Request Journey Timeline) */}
       <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-        <div className="app-glass p-6 rounded-2xl bg-card/65 shadow-md flex flex-col gap-4 relative overflow-hidden">
+        <div className="app-glass p-5 rounded-lg bg-card/65 shadow-md flex flex-col gap-4 relative overflow-hidden app-card-3d">
           <div className="absolute inset-0 app-hatch opacity-[0.03] pointer-events-none" />
           <AgentCard />
         </div>
 
         {recentLogs.length > 0 && (
-          <div className="app-glass p-6 rounded-2xl bg-card/65 shadow-md relative overflow-hidden">
-            <div className="absolute inset-0 app-hatch opacity-[0.02] pointer-events-none" />
-            <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-accent">Trace Journey</span>
-            <h4 className="text-xs font-bold text-foreground mt-1 mb-4">Request Execution Stages</h4>
+          <div className="p-5 rounded-xl border border-border bg-card/45 relative overflow-hidden">
             <RequestTimeline targetLog={recentLogs[0]} allLogs={allLogs} />
           </div>
         )}
       </div>
 
+      {/* Right Column (Metrics, Approvals, and Activity logs) */}
       <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-        <div className="app-glass p-5 rounded-2xl bg-card/65 shadow-md">
-          <SystemStatusPanel />
-        </div>
-
+        {/* Metric buttons */}
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => onNavigate("catalog")}
-            className="text-left p-5 rounded-2xl app-glass bg-card/50 hover:bg-card/75 hover:border-accent/40 shadow-sm cursor-pointer transition-all duration-200 group"
+            className="text-left p-4 rounded-xl border border-border bg-card/40 hover:bg-card/70 hover:border-accent/40 shadow-none cursor-pointer transition-all duration-200 group"
           >
             <div className="flex items-center justify-between text-muted-foreground mb-2">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider group-hover:text-foreground">MCP Tools</span>
@@ -130,7 +177,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
           <button
             onClick={() => onNavigate("policies")}
-            className="text-left p-5 rounded-2xl app-glass bg-card/50 hover:bg-card/75 hover:border-accent/40 shadow-sm cursor-pointer transition-all duration-200 group"
+            className="text-left p-4 rounded-xl border border-border bg-card/40 hover:bg-card/70 hover:border-accent/40 shadow-none cursor-pointer transition-all duration-200 group"
           >
             <div className="flex items-center justify-between text-muted-foreground mb-2">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider group-hover:text-foreground">Active Rules</span>
@@ -144,10 +191,9 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
             <p className="text-[9px] text-muted-foreground mt-1.5">Enabled guards</p>
           </button>
         </div>
-      </div>
 
-      <div className="col-span-12 lg:col-span-6">
-        <div className="app-glass p-6 rounded-2xl bg-card/65 shadow-md flex flex-col h-full justify-between">
+        {/* Pending Approvals */}
+        <div className="p-5 rounded-xl border border-border bg-card/45 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -165,7 +211,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
             </div>
 
             {pendingApprovals.length === 0 ? (
-              <div className="text-[10px] text-muted-foreground py-6 text-center bg-background/20 border border-border rounded-xl">
+              <div className="text-[10px] text-muted-foreground py-6 text-center bg-background/25 border border-border rounded-lg">
                 No actions requiring approval.
               </div>
             ) : (
@@ -173,13 +219,13 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
                 {pendingApprovals.map((app) => (
                   <div 
                     key={app.id}
-                    className="p-3 bg-muted/20 border border-border rounded-xl flex items-center justify-between text-xs"
+                    className="p-3 bg-muted/20 border border-border rounded-lg flex items-center justify-between text-xs"
                   >
                     <div className="min-w-0">
                       <p className="font-semibold text-foreground truncate">{app.toolName}</p>
                       <p className="text-[9px] text-muted-foreground truncate font-mono">ID: {app.id.slice(0, 8)}</p>
                     </div>
-                    <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/10">
+                    <span className="inline-flex px-2 py-0.5 rounded-sm text-[8px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/10">
                       PENDING
                     </span>
                   </div>
@@ -188,10 +234,9 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
             )}
           </div>
         </div>
-      </div>
 
-      <div className="col-span-12 lg:col-span-6">
-        <div className="app-glass p-6 rounded-2xl bg-card/65 shadow-md flex flex-col h-full justify-between">
+        {/* Recent Interceptions */}
+        <div className="p-5 rounded-xl border border-border bg-card/45 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -209,11 +254,11 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
             </div>
 
             {recentLogs.length === 0 ? (
-              <div className="text-[10px] text-muted-foreground py-6 text-center bg-background/20 border border-border rounded-xl">
+              <div className="text-[10px] text-muted-foreground py-6 text-center bg-background/25 border border-border rounded-lg">
                 No system activity logs found.
               </div>
             ) : (
-              <div className="divide-y divide-border/60 border border-border rounded-xl overflow-hidden bg-background/20 text-xs animate-in fade-in duration-300">
+              <div className="divide-y divide-border/60 border border-border rounded-lg overflow-hidden bg-background/25 text-xs animate-in fade-in duration-300">
                 {recentLogs.map((log) => {
                   const isDeny = log.decision === "DENY" || log.decision === "VALIDATION_FAILED";
                   const isPending = log.decision === "REQUIRE_APPROVAL";
@@ -229,7 +274,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
                           <p className="text-[9px] text-muted-foreground truncate font-mono">{new Date(log.createdAt).toLocaleTimeString()}</p>
                         </div>
                       </div>
-                      <span className={`inline-flex px-2 py-0.5 rounded text-[8px] font-bold border uppercase tracking-wider font-mono ${
+                      <span className={`inline-flex px-2 py-0.5 rounded-sm text-[8px] font-bold border uppercase tracking-wider font-mono ${
                         isDeny 
                           ? "bg-rose-500/10 text-rose-500 border-rose-500/10" 
                           : isPending 

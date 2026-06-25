@@ -91,9 +91,30 @@ export function ToolCatalogView() {
 
   if (loading && tools.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-sm font-semibold text-muted-foreground animate-pulse">
-          Loading tool catalog...
+      <div className="space-y-6 animate-pulse select-none">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2 w-1/3 animate-pulse">
+            <div className="h-4 bg-muted/65 rounded" />
+            <div className="h-3 bg-muted/40 rounded w-2/3" />
+          </div>
+          <div className="h-8 bg-muted/65 rounded w-20" />
+        </div>
+        
+        <div className="h-10 bg-muted/40 rounded-lg border border-border/40 w-full" />
+
+        <div className="border border-border/40 rounded-lg overflow-hidden bg-card/25 divide-y divide-border/30">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="p-4 flex justify-between items-center">
+              <div className="space-y-2 w-1/2">
+                <div className="h-4 bg-muted/65 rounded w-1/3 animate-pulse" />
+                <div className="h-3 bg-muted/40 rounded w-1/2 animate-pulse" />
+              </div>
+              <div className="flex gap-3">
+                <div className="h-5 bg-muted/40 rounded w-12" />
+                <div className="h-5 bg-muted/40 rounded w-16" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

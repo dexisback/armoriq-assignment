@@ -151,7 +151,7 @@ export function McpServersView({}: McpServersViewProps) {
               <div
                 key={server.id}
                 onClick={() => setSelectedServer(server)}
-                className="p-5 app-glass hover:border-accent/40 rounded-2xl flex flex-col justify-between gap-4 cursor-pointer transition-colors relative group"
+                className="p-4 rounded-lg border border-border bg-card/60 hover:border-accent/40 flex flex-col justify-between gap-3.5 cursor-pointer relative group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
@@ -159,8 +159,8 @@ export function McpServersView({}: McpServersViewProps) {
                       <Server size={16} className="text-accent" />
                       <span className="text-xs font-semibold text-foreground">{server.name}</span>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider ${badgeColor}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${state === "healthy" ? "bg-emerald-500" : (state === "offline" ? "bg-rose-500" : "bg-stone-500")} animate-pulse`} />
+                    <span className={`inline-flex items-center gap-1 text-[9px] uppercase tracking-wider ${state === "healthy" ? "text-emerald-600 dark:text-emerald-400 font-medium" : (state === "offline" ? "text-rose-600 dark:text-rose-400 font-medium" : "text-stone-500 font-medium")}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${state === "healthy" ? "bg-emerald-500" : (state === "offline" ? "bg-rose-500" : "bg-stone-500")}`} />
                       {status}
                     </span>
                   </div>
@@ -220,22 +220,27 @@ export function McpServersView({}: McpServersViewProps) {
         </div>
       )}
 
-      <div className="p-5 app-glass rounded-2xl space-y-3">
-        <div className="flex items-center gap-2">
-          <Info size={16} className="text-accent" />
-          <h4 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">What is an MCP Server?</h4>
+      <details className="group p-4 app-glass rounded-2xl [&_summary::-webkit-details-marker]:hidden border border-border">
+        <summary className="flex items-center justify-between text-xs font-mono font-semibold uppercase tracking-wider text-foreground cursor-pointer select-none">
+          <div className="flex items-center gap-2">
+            <Info size={14} className="text-accent" />
+            <span>What is an MCP Server?</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div className="mt-3 space-y-3 text-xs text-muted-foreground leading-relaxed">
+          <p>
+            Model Context Protocol (MCP) servers expose tools and resources that AI models can safely query or invoke. ArmorIQ dynamically registers these servers at runtime and applies safety, risk evaluation, and approval rule guardrails before any action execution.
+          </p>
+          <div className="space-y-1.5">
+            <p className="font-semibold text-foreground">Supported transports:</p>
+            <ul className="list-disc list-inside space-y-1 pl-1 font-medium">
+              <li><span className="font-semibold text-foreground font-mono">stdio:</span> Local process transport execution (e.g., node scripts).</li>
+              <li><span className="font-semibold text-foreground font-mono">SSE:</span> Server-Sent Events transport running over HTTP (e.g., remote services).</li>
+            </ul>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Model Context Protocol (MCP) servers expose tools and resources that AI models can safely query or invoke. ArmorIQ dynamically registers these servers at runtime and applies safety, risk evaluation, and approval rule guardrails before any action execution.
-        </p>
-        <div className="space-y-1.5 text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground">Supported transports:</p>
-          <ul className="list-disc list-inside space-y-1 pl-1 font-medium">
-            <li><span className="font-semibold text-foreground font-mono">stdio:</span> Local process transport execution (e.g., node scripts).</li>
-            <li><span className="font-semibold text-foreground font-mono">SSE:</span> Server-Sent Events transport running over HTTP (e.g., remote services).</li>
-          </ul>
-        </div>
-      </div>
+      </details>
 
       <AnimatePresence>
         {selectedServer && (
@@ -280,7 +285,7 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 25, stiffness: 220 }}
+        transition={{ type: "spring", mass: 1.2, stiffness: 180, damping: 20 }}
         className="relative w-full sm:max-w-md app-glass border-y-0 border-r-0 h-full flex flex-col shadow-2xl z-10 overflow-hidden"
       >
         <div className="h-16 border-b border-border bg-transparent flex items-center justify-between px-6 shrink-0">

@@ -76,6 +76,16 @@ export function PoliciesView() {
     fetchAllData();
   }, []);
 
+  useEffect(() => {
+    const handleOpenModal = () => {
+      openAddModal();
+    };
+    window.addEventListener("open-new-policy-modal", handleOpenModal);
+    return () => {
+      window.removeEventListener("open-new-policy-modal", handleOpenModal);
+    };
+  }, [tools]);
+
   // Update default tools selection if rules type is changed
   useEffect(() => {
     if (tools.length > 0 && !selectedTool) {
@@ -282,9 +292,31 @@ export function PoliciesView() {
 
   if (loading && rules.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-sm font-semibold text-muted-foreground animate-pulse">
-          Loading policies...
+      <div className="space-y-6 animate-pulse select-none">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2 w-1/3 animate-pulse">
+            <div className="h-4 bg-muted/65 rounded" />
+            <div className="h-3 bg-muted/40 rounded w-2/3" />
+          </div>
+          <div className="h-8 bg-muted/65 rounded w-28" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="p-4 rounded-lg border border-border/40 bg-card/25 h-[120px] flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-4 bg-muted/65 rounded w-1/4" />
+                  <div className="h-4 bg-muted/40 rounded w-12" />
+                </div>
+                <div className="h-3 bg-muted/40 rounded w-2/3" />
+              </div>
+              <div className="flex gap-2">
+                <div className="h-5 bg-muted/40 rounded w-16" />
+                <div className="h-5 bg-muted/40 rounded w-16" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -310,7 +342,7 @@ export function PoliciesView() {
       </div>
 
       {rules.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl app-glass">
+        <div className="text-center py-16 rounded-lg border border-border bg-card/45">
           <Shield className="mx-auto text-muted-foreground mb-3" size={24} />
           <h3 className="text-sm font-semibold text-foreground">No Policies Found</h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
@@ -331,7 +363,7 @@ export function PoliciesView() {
             return (
               <div
                 key={rule.id}
-                className={`p-5 rounded-2xl app-glass transition-all duration-200 ${
+                className={`group p-4 rounded-lg app-glass app-card-3d cursor-pointer transition-all duration-200 ${
                   rule.enabled ? "" : "opacity-60"
                 }`}
               >
@@ -347,9 +379,11 @@ export function PoliciesView() {
                       </span>
                     </div>
                     {rule.description && (
-                      <p className="text-xs text-muted-foreground leading-relaxed truncate max-w-2xl">
-                        {rule.description}
-                      </p>
+                      <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
+                        <p className="text-xs text-muted-foreground leading-relaxed pt-1.5 max-w-2xl">
+                          {rule.description}
+                        </p>
+                      </div>
                     )}
 
                     {/* Summary Parameters Block (Redesigned Human-Readable UX) */}
@@ -481,7 +515,7 @@ export function PoliciesView() {
       {/* modal block */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-          <div className="w-full max-w-lg app-glass rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg app-glass rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5 border-b border-border pb-3">
               <h3 className="text-sm font-semibold text-foreground">
                 {editingRuleId ? "Edit Security Policy" : "Create New Security Policy"}

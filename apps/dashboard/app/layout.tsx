@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Armoriq Guardrail Engine",
+  title: "ArmorIQ Policy Engine",
   description: "MCP security policy engine, tool loops, approvals and logs.",
 };
 

@@ -262,63 +262,80 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
         </p>
       </div>
 
-      <div className="relative pl-6 space-y-5">
-        <div className="absolute left-2.5 top-2.5 bottom-2.5 w-[2px] bg-border z-0" />
-
+      <div className="relative pl-6 space-y-6">
         {stages.map((stage, idx) => {
+          const isActive = stage.status === "Completed";
+          const isCurrent = stage.status === "Current";
           const isExpanded = expandedNodeIndex === idx;
+          const firstDetail = Object.values(stage.details)[0] || "";
+
           return (
-            <div key={idx} className="relative z-10 space-y-1.5">
-              <div className="absolute -left-[21.5px] top-0.5 bg-card rounded-full z-20">
-                {getStatusIcon(stage.status)}
-              </div>
-
-              <div 
-                onClick={() => setExpandedNodeIndex(isExpanded ? null : idx)}
-                className="flex items-center justify-between gap-3 p-3 bg-background/40 hover:bg-muted/10 border border-border rounded-xl cursor-pointer select-none transition-colors"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1 bg-card border border-border rounded-lg text-muted-foreground shrink-0">
-                    {getNodeIcon(stage.icon)}
-                  </div>
-                  <div className="min-w-0">
-                    <span className={`text-[11px] block truncate ${getStatusColor(stage.status)}`}>
-                      {stage.title}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground font-mono">
-                      {new Date(stage.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-muted-foreground">
-                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div className="ml-2 p-3.5 bg-background/50 border border-border rounded-xl space-y-2 animate-in slide-in-from-top-1 duration-150">
-                  <h5 className="text-[9px] font-mono font-bold uppercase text-muted-foreground">
-                    Stage Metadata
-                  </h5>
-                  <div className="space-y-1.5 text-[10px]">
-                    {Object.entries(stage.details).map(([key, val]) => (
-                      <div key={key} className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4 border-b border-border/40 pb-1 last:border-0 last:pb-0">
-                        <span className="text-muted-foreground font-medium shrink-0">{key}</span>
-                        <span className="font-mono text-foreground break-all text-right">
-                          {typeof val === "object" ? JSON.stringify(val, null, 2) : String(val)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div key={idx} className="relative z-10 pl-6 pb-2 last:pb-0">
+              {/* Connector line segment downwards */}
+              {idx < stages.length - 1 && (
+                <div 
+                  className={`absolute left-[-19.5px] top-[14px] bottom-[-30px] w-[1px] z-0 transition-colors duration-200 ${
+                    isActive ? "bg-accent" : "bg-border"
+                  }`} 
+                />
               )}
+
+              {/* Marker (Square) */}
+              <span 
+                className={`absolute left-[-24px] top-[4px] h-2.5 w-2.5 rounded-none z-10 transition-all duration-200 ${
+                  isActive 
+                    ? "bg-accent scale-110" 
+                    : isCurrent 
+                    ? "bg-amber-500 animate-pulse scale-110" 
+                    : "bg-muted-foreground/30"
+                }`} 
+              />
+
+              <div className="space-y-1">
+                <span className="text-[9px] font-mono text-muted-foreground/75 uppercase tracking-wider block">
+                  // STEP 0{idx + 1}
+                </span>
+                
+                <div 
+                  onClick={() => setExpandedNodeIndex(isExpanded ? null : idx)}
+                  className="flex items-center justify-between gap-2 group cursor-pointer"
+                >
+                  <h4 className="text-sm font-bold text-foreground leading-snug tracking-tight group-hover:text-accent transition-colors">
+                    {stage.title}
+                  </h4>
+                  <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm border border-border font-medium shrink-0">
+                    {new Date(stage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {typeof firstDetail === "object" ? JSON.stringify(firstDetail) : String(firstDetail)}
+                </p>
+
+                {isExpanded && (
+                  <div className="mt-2 p-3 bg-background/50 border border-border rounded-sm space-y-1.5 text-[9px] animate-in slide-in-from-top-1 duration-150">
+                    <h5 className="text-[9px] font-mono font-bold uppercase text-muted-foreground">
+                      Stage Details
+                    </h5>
+                    <div className="space-y-1">
+                      {Object.entries(stage.details).map(([key, val]) => (
+                        <div key={key} className="flex justify-between gap-4 border-b border-border/20 pb-1 last:border-0 last:pb-0">
+                          <span className="text-muted-foreground font-medium">{key}</span>
+                          <span className="font-mono text-foreground break-all text-right">
+                            {typeof val === "object" ? JSON.stringify(val, null, 2) : String(val)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="p-4 bg-muted/20 border border-border rounded-xl space-y-2">
+      <div className="p-4 bg-muted/20 border border-border rounded-sm space-y-2">
         <h5 className="text-[10px] font-mono font-bold uppercase text-foreground">How ArmorIQ Processes Requests</h5>
         <ol className="text-[10px] text-muted-foreground space-y-1.5 list-decimal list-inside font-semibold leading-relaxed">
           <li>User submits a prompt.</li>
