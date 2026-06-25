@@ -2,11 +2,11 @@
 node_modules/
 dist/
 generated/
-design/
-.agents/
-.agents
-skills/
-skills-lock.json
+# design/
+# .agents/
+# .agents
+# skills/
+# skills-lock.json
 /design-philosophy.md
 /audio-light-icons-summary.md
 /DESIGN_SYSTEM.md
