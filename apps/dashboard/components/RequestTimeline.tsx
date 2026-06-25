@@ -201,11 +201,11 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
   function getStatusIcon(status: string) {
     switch (status) {
       case "Completed":
-        return <CheckCircle2 size={16} className="text-green-500 bg-card rounded-full" />;
+        return <CheckCircle2 size={16} className="text-emerald-500 bg-card rounded-full" />;
       case "Current":
         return <Clock size={16} className="text-amber-500 bg-card rounded-full animate-pulse" />;
       case "Failed":
-        return <XCircle size={16} className="text-red-500 bg-card rounded-full" />;
+        return <XCircle size={16} className="text-rose-500 bg-card rounded-full" />;
       case "Skipped":
         return <MinusCircle size={16} className="text-stone-400 bg-card rounded-full" />;
       default:
@@ -239,11 +239,11 @@ export function RequestTimeline({ targetLog, allLogs }: RequestTimelineProps) {
   function getStatusColor(status: string) {
     switch (status) {
       case "Completed":
-        return "text-green-600 dark:text-green-400 font-bold";
+        return "text-emerald-600 dark:text-emerald-400 font-semibold";
       case "Current":
-        return "text-amber-600 dark:text-amber-400 font-bold";
+        return "text-amber-600 dark:text-amber-400 font-semibold";
       case "Failed":
-        return "text-red-600 dark:text-red-400 font-bold";
+        return "text-rose-600 dark:text-rose-400 font-semibold";
       case "Skipped":
         return "text-stone-400";
       default:

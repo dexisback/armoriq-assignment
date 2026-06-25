@@ -13,12 +13,27 @@ import {
   ChevronUp, 
   Shield 
 } from "lucide-react";
+import { sound } from "./SoundSystem";
 
 export function PoliciesView() {
   const [rules, setRules] = useState<any[]>([]);
   const [tools, setTools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    if (isModalOpen) {
+      sound.playModalOpen();
+    } else {
+      sound.playModalClose();
+    }
+  }, [isModalOpen, hasMounted]);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   
   // Collapsed rule JSON states
@@ -167,6 +182,11 @@ export function PoliciesView() {
   async function handleToggleRule(rule: any) {
     try {
       const updatedEnabled = !rule.enabled;
+      if (updatedEnabled) {
+        sound.playToggleOn();
+      } else {
+        sound.playToggleOff();
+      }
       setRules(prev => prev.map(r => r.id === rule.id ? { ...r, enabled: updatedEnabled } : r));
 
       const res = await fetch(`/api/rules/${rule.id}`, {
@@ -179,6 +199,7 @@ export function PoliciesView() {
         throw new Error("Toggle update failed");
       }
     } catch (err) {
+      sound.playError();
       console.error(err);
       fetchAllData();
     }
@@ -189,6 +210,7 @@ export function PoliciesView() {
 
     try {
       setRules(prev => prev.filter(r => r.id !== id));
+      sound.playSuccess();
 
       const res = await fetch(`/api/rules/${id}`, {
         method: "DELETE",
@@ -198,6 +220,7 @@ export function PoliciesView() {
         throw new Error("Delete failed");
       }
     } catch (err) {
+      sound.playError();
       console.error(err);
       fetchAllData();
     }
@@ -234,13 +257,16 @@ export function PoliciesView() {
       }
 
       if (res.ok) {
+        sound.playSuccess();
         setIsModalOpen(false);
         fetchAllData();
       } else {
+        sound.playError();
         const data = await res.json();
         alert(data.error || "Request failed");
       }
     } catch (err) {
+      sound.playError();
       alert("Network request error");
     } finally {
       setSubmitting(false);
@@ -269,14 +295,14 @@ export function PoliciesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-foreground">Security Policies & Rules</h2>
+          <h2 className="text-base font-semibold text-foreground">Security Policies & Rules</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Build guards to block tools, enforce path scopes, require approvals, or limit usage budgets.
           </p>
         </div>
         <button
           onClick={openAddModal}
-          className="app-btn-3d flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground font-semibold rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer"
+          className="app-btn-3d flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer"
         >
           <Plus size={14} />
           New Policy
@@ -284,15 +310,15 @@ export function PoliciesView() {
       </div>
 
       {rules.length === 0 ? (
-        <div className="text-center py-16 border border-border rounded-2xl bg-card">
+        <div className="text-center py-16 rounded-2xl app-glass">
           <Shield className="mx-auto text-muted-foreground mb-3" size={24} />
-          <h3 className="text-sm font-bold text-foreground">No Policies Found</h3>
+          <h3 className="text-sm font-semibold text-foreground">No Policies Found</h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
             Define safety schemas to protect your systems.
           </p>
           <button
             onClick={openAddModal}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-semibold cursor-pointer"
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-medium cursor-pointer"
           >
             Create Your First Rule
           </button>
@@ -305,15 +331,15 @@ export function PoliciesView() {
             return (
               <div
                 key={rule.id}
-                className={`p-5 rounded-2xl bg-card border transition-all duration-200 ${
-                  rule.enabled ? "border-border" : "border-border/40 opacity-70"
+                className={`p-5 rounded-2xl app-glass transition-all duration-200 ${
+                  rule.enabled ? "" : "opacity-60"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="text-xs font-bold text-foreground">{rule.name}</span>
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                      <span className="text-xs font-semibold text-foreground">{rule.name}</span>
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-medium uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
                         {rule.type}
                       </span>
                       <span className="text-[10px] text-muted-foreground font-mono font-tabular">
@@ -332,12 +358,12 @@ export function PoliciesView() {
                         {rule.type === "BLOCK_TOOL" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Target Tool</span>
-                              <p className="font-semibold text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Target Tool</span>
+                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Action</span>
-                              <p className="font-semibold text-red-500 mt-0.5">Block Tool</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
+                              <p className="font-medium text-rose-500 dark:text-rose-400 mt-0.5">Block Tool</p>
                             </div>
                           </>
                         )}
@@ -345,12 +371,12 @@ export function PoliciesView() {
                         {rule.type === "REQUIRE_APPROVAL" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Target Tool</span>
-                              <p className="font-semibold text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Target Tool</span>
+                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolNames?.[0] || "N/A"}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Action</span>
-                              <p className="font-semibold text-amber-500 mt-0.5">Require Human Approval</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
+                              <p className="font-medium text-amber-500 mt-0.5">Require Human Approval</p>
                             </div>
                           </>
                         )}
@@ -358,12 +384,12 @@ export function PoliciesView() {
                         {rule.type === "INPUT_VALIDATION" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Tool</span>
-                              <p className="font-semibold text-foreground mt-0.5">{rule.config?.toolName || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Tool</span>
+                              <p className="font-medium text-foreground mt-0.5">{rule.config?.toolName || "N/A"}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Allowed Prefix</span>
-                              <p className="font-mono font-semibold text-accent mt-0.5">{rule.config?.allowedPrefix || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Allowed Prefix</span>
+                              <p className="font-mono font-medium text-accent mt-0.5">{rule.config?.allowedPrefix || "N/A"}</p>
                             </div>
                           </>
                         )}
@@ -371,12 +397,12 @@ export function PoliciesView() {
                         {rule.type === "RISK_BASED" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Minimum Risk</span>
-                              <p className="font-semibold text-foreground mt-0.5 font-mono">{rule.config?.minimumRisk || "N/A"}</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Minimum Risk</span>
+                              <p className="font-medium text-foreground mt-0.5 font-mono">{rule.config?.minimumRisk || "N/A"}</p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Action</span>
-                              <p className="font-semibold text-foreground mt-0.5">
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
+                              <p className="font-medium text-foreground mt-0.5">
                                 {rule.config?.decision === "REQUIRE_APPROVAL" ? "Require Approval" : "Deny"}
                               </p>
                             </div>
@@ -386,14 +412,14 @@ export function PoliciesView() {
                         {rule.type === "BUDGET_LIMIT" && (
                           <>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Maximum Tokens</span>
-                              <p className="font-semibold text-foreground mt-0.5 font-mono font-tabular">
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Maximum Tokens</span>
+                              <p className="font-medium text-foreground mt-0.5 font-mono font-tabular">
                                 {(rule.config?.maxTokens || 0).toLocaleString()}
                               </p>
                             </div>
                             <div>
-                              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Action</span>
-                              <p className="font-semibold text-foreground mt-0.5">Budget Limit</p>
+                              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Action</span>
+                              <p className="font-medium text-foreground mt-0.5">Budget Limit</p>
                             </div>
                           </>
                         )}
@@ -404,7 +430,7 @@ export function PoliciesView() {
                     <div className="mt-3">
                       <button
                         onClick={() => toggleExpandRuleJson(rule.id)}
-                        className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         Advanced
                         {isJsonExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -439,7 +465,7 @@ export function PoliciesView() {
                     </button>
                     <button
                       onClick={() => handleDeleteRule(rule.id)}
-                      className="p-2 border border-border hover:border-red-500/30 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg cursor-pointer transition-colors"
+                      className="p-2 border border-border hover:border-rose-500/30 hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 rounded-lg cursor-pointer transition-colors"
                       title="Delete Rule"
                     >
                       <Trash2 size={12} />
@@ -455,9 +481,9 @@ export function PoliciesView() {
       {/* modal block */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-card border border-border rounded-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg app-glass rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5 border-b border-border pb-3">
-              <h3 className="text-sm font-bold text-foreground">
+              <h3 className="text-sm font-semibold text-foreground">
                 {editingRuleId ? "Edit Security Policy" : "Create New Security Policy"}
               </h3>
               <button
@@ -470,7 +496,7 @@ export function PoliciesView() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                   Rule Name
                 </label>
                 <input
@@ -479,12 +505,12 @@ export function PoliciesView() {
                   placeholder="e.g. Block file writes"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                   Description
                 </label>
                 <textarea
@@ -492,19 +518,19 @@ export function PoliciesView() {
                   placeholder="Enforces security constraints on active tools"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent resize-none"
+                  className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent resize-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Rule Type
                   </label>
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
                   >
                     <option value="BLOCK_TOOL">BLOCK_TOOL</option>
                     <option value="REQUIRE_APPROVAL">REQUIRE_APPROVAL</option>
@@ -515,7 +541,7 @@ export function PoliciesView() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Priority
                   </label>
                   <input
@@ -523,7 +549,7 @@ export function PoliciesView() {
                     min="1"
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
-                    className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
                   />
                 </div>
               </div>
@@ -531,13 +557,13 @@ export function PoliciesView() {
               {/* DYNAMIC FIELD SECTIONS */}
               {(type === "BLOCK_TOOL" || type === "REQUIRE_APPROVAL" || type === "INPUT_VALIDATION") && (
                 <div>
-                  <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Target Tool
                   </label>
                   <select
                     value={selectedTool}
                     onChange={(e) => setSelectedTool(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
                   >
                     {tools.map((t) => (
                       <option key={t.id} value={t.toolName}>
@@ -550,7 +576,7 @@ export function PoliciesView() {
 
               {type === "INPUT_VALIDATION" && (
                 <div>
-                  <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Allowed Path Prefix
                   </label>
                   <input
@@ -559,7 +585,7 @@ export function PoliciesView() {
                     value={allowedPrefix}
                     onChange={(e) => setAllowedPrefix(e.target.value)}
                     placeholder="/sandbox/"
-                    className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
                   />
                 </div>
               )}
@@ -567,13 +593,13 @@ export function PoliciesView() {
               {type === "RISK_BASED" && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                       Trigger Risk
                     </label>
                     <select
                       value={minimumRisk}
                       onChange={(e) => setMinimumRisk(e.target.value)}
-                      className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
                     >
                       <option value="LOW">LOW</option>
                       <option value="MEDIUM">MEDIUM</option>
@@ -583,13 +609,13 @@ export function PoliciesView() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                       Decision
                     </label>
                     <select
                       value={decision}
                       onChange={(e) => setDecision(e.target.value)}
-                      className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
+                      className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent"
                     >
                       <option value="REQUIRE_APPROVAL">REQUIRE_APPROVAL</option>
                       <option value="DENY">DENY</option>
@@ -600,7 +626,7 @@ export function PoliciesView() {
 
               {type === "BUDGET_LIMIT" && (
                 <div>
-                  <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <label className="block text-[10px] font-mono font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                     Conversation Budget (tokens)
                   </label>
                   <input
@@ -609,17 +635,17 @@ export function PoliciesView() {
                     required
                     value={maxTokens}
                     onChange={(e) => setMaxTokens(Number(e.target.value))}
-                    className="w-full text-xs font-semibold px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
+                    className="w-full text-xs font-medium px-3 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent font-mono"
                   />
                 </div>
               )}
 
               {/* HUMAN READABLE PREVIEW PANEL */}
               <div className="p-3 bg-muted/40 border border-border/80 rounded-xl">
-                <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block mb-1">
+                <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1">
                   Summary Preview
                 </span>
-                <p className="text-xs text-foreground font-semibold leading-relaxed">
+                <p className="text-xs text-foreground font-medium leading-relaxed">
                   {getRulePreviewText()}
                 </p>
               </div>
@@ -629,7 +655,7 @@ export function PoliciesView() {
                 <button
                   type="button"
                   onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Advanced
                   {isAdvancedOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -637,7 +663,7 @@ export function PoliciesView() {
 
                 {isAdvancedOpen && (
                   <div className="mt-1.5 space-y-1">
-                    <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block">
+                    <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block">
                       Generated Config JSON:
                     </span>
                     <pre className="text-[10px] font-mono bg-background border border-border p-3 rounded-lg overflow-x-auto text-foreground">
@@ -651,14 +677,14 @@ export function PoliciesView() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border rounded-xl text-xs font-semibold hover:bg-muted/40 cursor-pointer"
+                  className="px-4 py-2 border border-border rounded-xl text-xs font-medium hover:bg-muted/40 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || (type === "BLOCK_TOOL" || type === "REQUIRE_APPROVAL" || type === "INPUT_VALIDATION" ? !selectedTool : false)}
-                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground font-semibold rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer disabled:opacity-50"
+                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground font-medium rounded-xl text-xs transition-colors hover:opacity-90 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : editingRuleId ? "Save Changes" : "Create Policy"}
                 </button>

@@ -15,6 +15,7 @@ import {
   ShieldAlert,
   ArrowRight
 } from "lucide-react";
+import { sound } from "./SoundSystem";
 
 interface CommandSearchModalProps {
   isOpen: boolean;
@@ -36,6 +37,20 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
   const [servers, setServers] = useState<any[]>([]);
   const [rules, setRules] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    if (isOpen) {
+      sound.playModalOpen();
+    } else {
+      sound.playModalClose();
+    }
+  }, [isOpen, hasMounted]);
 
   useEffect(() => {
     async function fetchData() {
@@ -215,9 +230,9 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 transition-opacity" />
-        <Dialog.Content className="fixed top-[15%] left-[50%] -translate-x-[50%] w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col p-0">
+        <Dialog.Content className="fixed top-[15%] left-[50%] -translate-x-[50%] w-full max-w-lg app-glass rounded-2xl z-50 overflow-hidden flex flex-col p-0">
           <Command className="w-full flex flex-col" label="Smart Search">
-            <div className="flex items-center gap-2.5 px-4 border-b border-border bg-card">
+            <div className="flex items-center gap-2.5 px-4 border-b border-border bg-transparent">
               <Search size={14} className="text-muted-foreground shrink-0" />
               <Command.Input
                 value={search}
@@ -247,6 +262,7 @@ export function CommandSearchModal({ isOpen, onClose, onNavigate }: CommandSearc
                       <Command.Item
                         key={item.id}
                         onSelect={() => {
+                          sound.playTap();
                           item.action();
                           onClose();
                         }}

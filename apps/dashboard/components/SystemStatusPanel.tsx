@@ -15,16 +15,16 @@ interface SubsystemCardProps {
 
 function SubsystemCard({ name, status, description, icon: Icon, state, metrics }: SubsystemCardProps) {
   const badgeColors = {
-    healthy: "bg-green-500/10 text-green-500 border border-green-500/20",
-    warning: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
-    error: "bg-red-500/10 text-red-500 border border-red-500/20",
+    healthy: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+    error: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
     unknown: "bg-stone-500/10 text-stone-500 border border-stone-500/20",
   };
 
   const dotColors = {
-    healthy: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]",
-    warning: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
-    error: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]",
+    healthy: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
+    warning: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]",
+    error: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
     unknown: "bg-stone-500",
   };
 
@@ -257,7 +257,7 @@ export function SystemStatusPanel() {
       ) : (
         <>
           {error && (
-            <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl flex items-start gap-2 text-[10px] text-red-500">
+            <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-xl flex items-start gap-2 text-[10px] text-rose-500">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold">Operational Alert:</span> Health monitoring connection issues. Status indicators may reflect cached or partial states.
@@ -285,23 +285,23 @@ export function SystemStatusPanel() {
             </h5>
             <ul className="text-[10px] text-muted-foreground space-y-1.5 font-semibold">
               <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${error ? "bg-red-500" : "bg-green-500"}`} />
+                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${error ? "bg-rose-500" : "bg-emerald-500"}`} />
                 AI Agent {error ? "offline or unreachable" : "running normally"}
               </li>
               <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dbStatus === "error" || error ? "bg-red-500" : "bg-green-500"}`} />
+                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dbStatus === "error" || error ? "bg-rose-500" : "bg-emerald-500"}`} />
                 Prisma & Postgres Connection {dbStatus === "healthy" && !error ? "Active" : "Disconnected"}
               </li>
               <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
                 Policy Engine loaded ({activeRulesCount} rules loaded)
               </li>
               <li className="flex items-center gap-2">
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${redisStatus === "warning" || error ? "bg-amber-500" : "bg-green-500"}`} />
+                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${redisStatus === "warning" || error ? "bg-amber-500" : "bg-emerald-500"}`} />
                 Runtime synchronization {redisStatus === "healthy" && !error ? "active" : "degraded (warning)"}
               </li>
               <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
                 Ready to evaluate actions and process AI tool requests
               </li>
             </ul>

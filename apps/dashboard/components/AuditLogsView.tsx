@@ -39,11 +39,11 @@ export function AuditLogsView() {
   function getDecisionBadge(decision: string) {
     switch (decision) {
       case "ALLOW":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
       case "DENY":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
+        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
       case "REQUIRE_APPROVAL":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
       case "VALIDATION_FAILED":
         return "bg-purple-500/10 text-purple-500 border-purple-500/20";
       default:
@@ -54,13 +54,13 @@ export function AuditLogsView() {
   function getRiskBadge(risk: string) {
     switch (risk) {
       case "LOW":
-        return "text-green-500";
+        return "text-emerald-600 dark:text-emerald-400";
       case "MEDIUM":
         return "text-blue-500";
       case "HIGH":
-        return "text-amber-500";
+        return "text-amber-600 dark:text-amber-400";
       case "CRITICAL":
-        return "text-red-500 font-bold";
+        return "text-rose-600 dark:text-rose-400 font-semibold";
       default:
         return "text-muted-foreground";
     }
@@ -142,7 +142,7 @@ export function AuditLogsView() {
                   </td>
                   <td className="p-4">
                     <span className={`inline-flex items-center gap-1.5 font-semibold ${
-                      log.executed ? "text-green-500" : "text-red-500"
+                      log.executed ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                     }`}>
                       {log.executed ? (
                         <>
@@ -213,7 +213,7 @@ export function AuditLogsView() {
                 </div>
                 <div>
                   <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Executed</span>
-                  <p className={`font-bold mt-0.5 ${selectedLog.executed ? "text-green-500" : "text-red-500"}`}>
+                  <p className={`font-semibold mt-0.5 ${selectedLog.executed ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                     {selectedLog.executed ? "Yes" : "No (Blocked)"}
                   </p>
                 </div>

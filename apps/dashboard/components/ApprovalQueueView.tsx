@@ -67,16 +67,16 @@ export function ApprovalQueueView() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-foreground">Action Approval Queue</h2>
+        <h2 className="text-base font-semibold text-foreground">Action Approval Queue</h2>
         <p className="text-xs text-muted-foreground mt-1">
           Review and approve or reject intercepted actions that require dynamic manual authorization.
         </p>
       </div>
 
       {approvals.length === 0 ? (
-        <div className="text-center py-16 border border-border rounded-2xl bg-card">
+        <div className="text-center py-16 rounded-2xl app-glass">
           <ClipboardCheck className="mx-auto text-muted-foreground mb-3" size={24} />
-          <h3 className="text-xs font-bold text-foreground">All Clear!</h3>
+          <h3 className="text-xs font-semibold text-foreground">All Clear!</h3>
           <p className="text-[11px] text-muted-foreground mt-1">
             No pending action approvals are currently in the queue.
           </p>
@@ -87,12 +87,12 @@ export function ApprovalQueueView() {
             <div
               key={approval.id}
               onClick={() => setSelectedApproval(approval)}
-              className="p-5 rounded-2xl bg-card border border-border hover:border-accent/40 hover:bg-muted/10 transition-all flex flex-col md:flex-row md:items-start justify-between gap-6 relative overflow-hidden cursor-pointer group"
+              className="p-5 rounded-2xl app-glass hover:border-accent/40 hover:bg-muted/10 transition-all flex flex-col md:flex-row md:items-start justify-between gap-6 relative overflow-hidden cursor-pointer group"
             >
               <div className="space-y-3 flex-1 min-w-0">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-foreground">{approval.toolName}</span>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <span className="text-xs font-semibold text-foreground">{approval.toolName}</span>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
                     <Clock size={10} />
                     {approval.status}
                   </span>
@@ -102,7 +102,7 @@ export function ApprovalQueueView() {
                 </div>
 
                 <div>
-                  <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block mb-1">
+                  <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1">
                     Intercepted Parameters:
                   </span>
                   <pre className="text-[10px] font-mono bg-background/50 border border-border p-2.5 rounded-lg overflow-x-auto text-foreground max-h-32">
@@ -122,7 +122,7 @@ export function ApprovalQueueView() {
                     e.stopPropagation();
                     resolveApproval(approval.id, "reject");
                   }}
-                  className="px-4 py-2 border border-red-500/20 hover:border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 border border-rose-500/20 hover:border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-500 dark:text-rose-400 text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
                 >
                   <X size={14} />
                   Reject
@@ -133,7 +133,7 @@ export function ApprovalQueueView() {
                     e.stopPropagation();
                     resolveApproval(approval.id, "approve");
                   }}
-                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
+                  className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
                 >
                   <Check size={14} />
                   Approve

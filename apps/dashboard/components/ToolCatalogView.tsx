@@ -77,13 +77,13 @@ export function ToolCatalogView() {
   function getRiskBadgeClass(risk: string) {
     switch (risk) {
       case "LOW":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
       case "MEDIUM":
         return "bg-blue-500/10 text-blue-500 border-blue-500/20";
       case "HIGH":
         return "bg-amber-500/10 text-amber-500 border-amber-500/20";
       case "CRITICAL":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
+        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
       default:
         return "bg-muted text-muted-foreground border-border";
     }

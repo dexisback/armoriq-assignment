@@ -89,10 +89,10 @@ export function AgentCard() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-[500px] bg-card border border-border rounded-2xl p-6 shadow-sm">
+    <div className="flex flex-col h-full min-h-[500px] bg-transparent rounded-2xl">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
         <Bot size={16} className="text-accent" />
-        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+        <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
           AI Agent Console
         </h3>
       </div>
@@ -117,7 +117,7 @@ export function AgentCard() {
           disabled={chatMutation.isPending}
         />
         
-        <p className="text-[10px] text-muted-foreground font-semibold italic">
+        <p className="text-[10px] text-muted-foreground font-medium italic">
           This chat interacts with the live AI agent. Tool calls are evaluated by the Policy Engine before execution.
         </p>
       </div>

@@ -4,3 +4,8 @@ dist/
 generated/
 design/*
 design/
+
+# agents and skills
+.agents/
+.agents
+skills-lock.json

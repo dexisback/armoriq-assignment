@@ -12,6 +12,7 @@ import {
   Clock, 
   Info 
 } from "lucide-react";
+import { sound } from "./SoundSystem";
 
 interface PromptScanData {
   suspicious: boolean;
@@ -31,6 +32,20 @@ export function PromptPlaygroundView() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    if (selectedLog) {
+      sound.playModalOpen();
+    } else {
+      sound.playModalClose();
+    }
+  }, [selectedLog, hasMounted]);
 
   const suggestedChips = [
     "Ignore previous instructions",
@@ -83,6 +98,7 @@ export function PromptPlaygroundView() {
       const isRecent = newestLog && (Date.now() - new Date(newestLog.createdAt).getTime()) < 12000;
 
       if (isRecent) {
+        sound.playError();
         setScanResult({
           suspicious: true,
           prompt: trimmed,
@@ -92,6 +108,7 @@ export function PromptPlaygroundView() {
           rawLog: newestLog,
         });
       } else {
+        sound.playSuccess();
         setScanResult({
           suspicious: false,
           prompt: trimmed,
@@ -101,6 +118,7 @@ export function PromptPlaygroundView() {
       // Refresh history log table
       fetchPromptLogs();
     } catch (err) {
+      sound.playError();
       alert("Error sending test prompt");
     } finally {
       setScanning(false);
@@ -111,7 +129,7 @@ export function PromptPlaygroundView() {
     <div className="space-y-8">
       {/* Top Banner */}
       <div>
-        <h2 className="text-base font-bold text-foreground">Prompt Injection Playground</h2>
+        <h2 className="text-base font-semibold text-foreground">Prompt Injection Playground</h2>
         <p className="text-xs text-muted-foreground mt-1">
           Test system input against the ArmorIQ Prompt Security scanner to evaluate policy logging behavior.
         </p>
@@ -121,17 +139,17 @@ export function PromptPlaygroundView() {
         
         {/* Left Side - Playground console (55% width approx) */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-6">
-          <div className="p-6 rounded-2xl bg-card border border-border shadow-sm flex flex-col gap-5">
+          <div className="p-6 rounded-2xl app-glass flex flex-col gap-5">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <Terminal size={15} className="text-accent" />
-              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
                 Testing Terminal
               </h3>
             </div>
 
             {/* Suggested Chip List */}
             <div className="space-y-1.5">
-              <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">
+              <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">
                 Suggested Test Attack Prompts:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -141,7 +159,7 @@ export function PromptPlaygroundView() {
                     type="button"
                     disabled={scanning}
                     onClick={() => setPromptInput(chip)}
-                    className="px-2.5 py-1 text-[10px] font-semibold bg-background hover:bg-muted/40 border border-border hover:border-accent/40 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer transition-all disabled:opacity-50"
+                    className="px-2.5 py-1 text-[10px] font-medium bg-background hover:bg-muted/40 border border-border hover:border-accent/40 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer transition-all disabled:opacity-50"
                   >
                     {chip}
                   </button>
@@ -151,7 +169,7 @@ export function PromptPlaygroundView() {
 
             {/* Input Form */}
             <div className="space-y-3">
-              <label className="block text-[9px] font-mono font-bold uppercase text-muted-foreground">
+              <label className="block text-[9px] font-mono font-medium uppercase text-muted-foreground">
                 Input Prompt
               </label>
               <textarea
@@ -166,7 +184,7 @@ export function PromptPlaygroundView() {
                 type="button"
                 disabled={scanning || !promptInput.trim()}
                 onClick={handleTestPrompt}
-                className="app-btn-3d flex items-center justify-center gap-2 px-5 py-2.5 bg-accent text-accent-foreground text-xs font-bold rounded-xl w-full cursor-pointer disabled:opacity-50"
+                className="app-btn-3d flex items-center justify-center gap-2 px-5 py-2.5 bg-accent text-accent-foreground text-xs font-semibold rounded-xl w-full cursor-pointer disabled:opacity-50"
               >
                 <Send size={12} />
                 {scanning ? "Scanning..." : "Test Prompt"}
@@ -176,23 +194,23 @@ export function PromptPlaygroundView() {
 
           {/* Dynamic Detection Result Card */}
           {scanResult && (
-            <div className={`p-6 rounded-2xl border shadow-sm ${
+            <div className={`p-6 rounded-2xl border transition-all ${
               scanResult.suspicious 
-                ? "bg-red-500/[0.02] border-red-500/30" 
-                : "bg-green-500/[0.02] border-green-500/30"
+                ? "bg-rose-500/[0.02] border-rose-500/20" 
+                : "bg-emerald-500/[0.02] border-emerald-500/20"
             }`}>
               <div className="flex items-center gap-2 mb-4">
                 {scanResult.suspicious ? (
                   <>
-                    <AlertTriangle size={18} className="text-red-500" />
-                    <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider font-mono">
+                    <AlertTriangle size={18} className="text-rose-500" />
+                    <h4 className="text-xs font-semibold text-rose-500 uppercase tracking-wider font-mono">
                       Suspicious Prompt Detected
                     </h4>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 size={18} className="text-green-500" />
-                    <h4 className="text-xs font-bold text-green-500 uppercase tracking-wider font-mono">
+                    <CheckCircle2 size={18} className="text-emerald-500" />
+                    <h4 className="text-xs font-semibold text-emerald-500 uppercase tracking-wider font-mono">
                       Prompt Appears Safe
                     </h4>
                   </>
@@ -204,20 +222,20 @@ export function PromptPlaygroundView() {
                   {/* Metadata Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-background/50 border border-border p-3.5 rounded-xl text-[11px]">
                     <div>
-                      <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Severity</span>
-                      <p className="font-bold text-red-500 mt-0.5">Medium</p>
+                      <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Severity</span>
+                      <p className="font-semibold text-rose-500 mt-0.5">Medium</p>
                     </div>
                     <div>
-                      <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Decision</span>
-                      <p className="font-semibold text-foreground mt-0.5">Logged</p>
+                      <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Decision</span>
+                      <p className="font-medium text-foreground mt-0.5">Logged</p>
                     </div>
                     <div>
-                      <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Status</span>
-                      <p className="font-semibold text-foreground mt-0.5">Allowed to Continue</p>
+                      <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Status</span>
+                      <p className="font-medium text-foreground mt-0.5">Allowed to Continue</p>
                     </div>
                     {scanResult.logId && (
                       <div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Log ID</span>
+                        <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Log ID</span>
                         <p className="font-mono text-muted-foreground mt-0.5 truncate">{scanResult.logId.slice(0, 8)}</p>
                       </div>
                     )}
@@ -226,11 +244,11 @@ export function PromptPlaygroundView() {
                   {/* Matched patterns */}
                   {scanResult.matchedPatterns && scanResult.matchedPatterns.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Matched Patterns:</span>
+                      <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Matched Patterns:</span>
                       <ul className="space-y-1 pl-1">
                         {scanResult.matchedPatterns.map((pat) => (
                           <li key={pat} className="flex items-center gap-2 text-foreground font-mono">
-                            <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
                             {pat}
                           </li>
                         ))}
@@ -240,7 +258,7 @@ export function PromptPlaygroundView() {
 
                   {/* Explanation description */}
                   <div className="p-3 bg-muted/20 border border-border rounded-xl">
-                    <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block mb-1">
+                    <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1">
                       Explanation
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
@@ -261,24 +279,24 @@ export function PromptPlaygroundView() {
         <div className="col-span-12 lg:col-span-5 flex flex-col gap-6">
           
           {/* Educational panel */}
-          <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col gap-3.5">
+          <div className="p-5 rounded-2xl app-glass flex flex-col gap-3.5">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <BookOpen size={15} className="text-accent" />
-              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
                 Playground Guide
               </h3>
             </div>
             
             <div className="space-y-3.5 text-xs text-muted-foreground leading-relaxed">
               <div>
-                <h4 className="font-bold text-foreground mb-1">What is Prompt Injection?</h4>
+                <h4 className="font-semibold text-foreground mb-1">What is Prompt Injection?</h4>
                 <p>
                   Prompt injection is an attack where a user attempts to manipulate an AI model into ignoring its intended behavior or safety constraints.
                 </p>
               </div>
 
               <div>
-                <h4 className="font-bold text-foreground mb-1.5">How ArmorIQ Handles It:</h4>
+                <h4 className="font-semibold text-foreground mb-1.5">How ArmorIQ Handles It:</h4>
                 <ul className="space-y-1 list-disc pl-4 text-[11px]">
                   <li>Prompt scanned before LLM execution</li>
                   <li>Suspicious prompts logged</li>
@@ -297,10 +315,10 @@ export function PromptPlaygroundView() {
           </div>
 
           {/* Historical Logs List */}
-          <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col min-h-[250px]">
+          <div className="p-5 rounded-2xl app-glass flex flex-col min-h-[250px]">
             <div className="flex items-center gap-2 pb-2 border-b border-border mb-4">
               <ShieldAlert size={15} className="text-muted-foreground" />
-              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
                 Injection Log History
               </h3>
             </div>
@@ -314,7 +332,7 @@ export function PromptPlaygroundView() {
                 No prompt injection events logged yet.
               </div>
             ) : (
-              <div className="border border-border rounded-xl overflow-hidden bg-background/50 divide-y divide-border text-[11px] max-h-80 overflow-y-auto">
+              <div className="border border-border rounded-xl overflow-hidden bg-background/50 divide-y divide-border text-[11px] max-h-80 overflow-y-auto no-scrollbar">
                 {logs.map((log) => (
                   <div
                     key={log.id}
@@ -322,13 +340,13 @@ export function PromptPlaygroundView() {
                     className="p-3 flex items-center justify-between hover:bg-muted/15 cursor-pointer transition-colors"
                   >
                     <div className="min-w-0 pr-3">
-                      <p className="font-bold text-foreground truncate">{log.reason || "Prompt Injection Event"}</p>
+                      <p className="font-semibold text-foreground truncate">{log.reason || "Prompt Injection Event"}</p>
                       <p className="text-[9px] text-muted-foreground font-mono font-tabular mt-0.5">
                         {new Date(log.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                      <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20">
                         Logged
                       </span>
                     </div>
@@ -344,10 +362,10 @@ export function PromptPlaygroundView() {
       {/* Details Inspector Drawer/Modal */}
       {selectedLog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-          <div className="w-full max-w-xl bg-card border border-border rounded-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-xl app-glass rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5 border-b border-border pb-3">
               <div>
-                <h3 className="text-sm font-bold text-foreground">Injection Log Details</h3>
+                <h3 className="text-sm font-semibold text-foreground">Injection Log Details</h3>
                 <p className="text-[10px] text-muted-foreground font-mono mt-0.5">Log ID: {selectedLog.id}</p>
               </div>
               <button
@@ -360,7 +378,7 @@ export function PromptPlaygroundView() {
 
             <div className="space-y-4 text-xs">
               <div className="space-y-1">
-                <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Tested Prompt</span>
+                <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Tested Prompt</span>
                 <p className="p-3 bg-background border border-border rounded-xl font-mono text-foreground whitespace-pre-wrap leading-relaxed">
                   {selectedLog.arguments?.message || selectedLog.arguments?.prompt || "[Prompt content not stored by backend]"}
                 </p>
@@ -368,29 +386,29 @@ export function PromptPlaygroundView() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Decision</span>
-                  <p className="font-semibold text-foreground mt-0.5">{selectedLog.decision}</p>
+                  <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Decision</span>
+                  <p className="font-medium text-foreground mt-0.5">{selectedLog.decision}</p>
                 </div>
                 <div>
-                  <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground">Timestamp</span>
-                  <p className="font-semibold text-foreground mt-0.5 font-mono">{new Date(selectedLog.createdAt).toLocaleString()}</p>
+                  <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground">Timestamp</span>
+                  <p className="font-medium text-foreground mt-0.5 font-mono">{new Date(selectedLog.createdAt).toLocaleString()}</p>
                 </div>
               </div>
 
               <div>
-                <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block mb-1">
+                <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1">
                   Matched Patterns
                 </span>
-                <p className="font-mono font-semibold text-red-500">
+                <p className="font-mono font-medium text-rose-500 dark:text-rose-400">
                   {selectedLog.reason || "N/A"}
                 </p>
               </div>
 
               <div>
-                <span className="text-[9px] font-mono font-bold uppercase text-muted-foreground block mb-1.5">
+                <span className="text-[9px] font-mono font-medium uppercase text-muted-foreground block mb-1.5">
                   Raw Trace JSON
                 </span>
-                <pre className="font-mono text-[10px] bg-background/50 border border-border p-4 rounded-xl overflow-x-auto text-foreground max-h-48 leading-normal">
+                <pre className="font-mono text-[10px] bg-background/50 border border-border p-4 rounded-xl overflow-x-auto text-foreground max-h-48 leading-normal no-scrollbar">
                   {JSON.stringify(selectedLog.trace, null, 2)}
                 </pre>
               </div>
@@ -399,7 +417,7 @@ export function PromptPlaygroundView() {
                 <button
                   type="button"
                   onClick={() => setSelectedLog(null)}
-                  className="px-4 py-2 border border-border rounded-xl text-xs font-semibold hover:bg-muted/40 cursor-pointer"
+                  className="px-4 py-2 border border-border rounded-xl text-xs font-medium hover:bg-muted/40 cursor-pointer"
                 >
                   Close Inspector
                 </button>

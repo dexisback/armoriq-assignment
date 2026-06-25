@@ -79,7 +79,7 @@ export function McpServersView({}: McpServersViewProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-foreground">MCP Servers</h2>
+          <h2 className="text-base font-semibold text-foreground">MCP Servers</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Manage and monitor connected Model Context Protocol providers.
           </p>
@@ -87,7 +87,7 @@ export function McpServersView({}: McpServersViewProps) {
         <button
           onClick={handleRefreshAll}
           disabled={refreshingId !== null || isLoading}
-          className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all self-start sm:self-auto"
+          className="app-btn-3d px-4 py-2 bg-accent text-accent-foreground text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all self-start sm:self-auto"
         >
           <RefreshCw size={14} className={refreshingId === "all" ? "animate-spin" : ""} />
           Refresh Discovery
@@ -102,21 +102,21 @@ export function McpServersView({}: McpServersViewProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 bg-card border border-border rounded-2xl shadow-sm">
-            <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Connected Servers</span>
-            <div className="text-xl font-bold text-foreground mt-1">{serversList.length}</div>
+          <div className="p-4 rounded-2xl app-glass">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-wider text-muted-foreground">Connected Servers</span>
+            <div className="text-xl font-semibold text-foreground mt-1">{serversList.length}</div>
           </div>
-          <div className="p-4 bg-card border border-border rounded-2xl shadow-sm">
-            <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Healthy Servers</span>
-            <div className="text-xl font-bold text-green-500 mt-1">{healthyServersCount}</div>
+          <div className="p-4 rounded-2xl app-glass">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-wider text-muted-foreground">Healthy Servers</span>
+            <div className="text-xl font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{healthyServersCount}</div>
           </div>
-          <div className="p-4 bg-card border border-border rounded-2xl shadow-sm">
-            <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Total Discovered Tools</span>
-            <div className="text-xl font-bold text-foreground mt-1">{tools.length}</div>
+          <div className="p-4 rounded-2xl app-glass">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-wider text-muted-foreground">Total Discovered Tools</span>
+            <div className="text-xl font-semibold text-foreground mt-1">{tools.length}</div>
           </div>
-          <div className="p-4 bg-card border border-border rounded-2xl shadow-sm">
-            <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Last Discovery</span>
-            <div className="text-xs font-semibold text-foreground mt-2 truncate">Synchronized</div>
+          <div className="p-4 rounded-2xl app-glass">
+            <span className="text-[9px] font-mono font-medium uppercase tracking-wider text-muted-foreground">Last Discovery</span>
+            <div className="text-xs font-medium text-foreground mt-2 truncate">Synchronized</div>
           </div>
         </div>
       )}
@@ -142,25 +142,25 @@ export function McpServersView({}: McpServersViewProps) {
 
             const badgeColor =
               state === "healthy"
-                ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                 : state === "offline"
-                ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                 : "bg-stone-500/10 text-stone-500 border border-stone-500/20";
 
             return (
               <div
                 key={server.id}
                 onClick={() => setSelectedServer(server)}
-                className="p-5 bg-card border border-border hover:border-accent/40 rounded-2xl shadow-sm flex flex-col justify-between gap-4 cursor-pointer transition-colors relative group"
+                className="p-5 app-glass hover:border-accent/40 rounded-2xl flex flex-col justify-between gap-4 cursor-pointer transition-colors relative group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Server size={16} className="text-accent" />
-                      <span className="text-xs font-bold text-foreground">{server.name}</span>
+                      <span className="text-xs font-semibold text-foreground">{server.name}</span>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${badgeColor}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${state === "healthy" ? "bg-green-500" : (state === "offline" ? "bg-red-500" : "bg-stone-500")} animate-pulse`} />
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider ${badgeColor}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${state === "healthy" ? "bg-emerald-500" : (state === "offline" ? "bg-rose-500" : "bg-stone-500")} animate-pulse`} />
                       {status}
                     </span>
                   </div>
@@ -168,7 +168,7 @@ export function McpServersView({}: McpServersViewProps) {
                   <div className="grid grid-cols-2 gap-2 text-[10px]">
                     <div>
                       <span className="text-[8px] font-mono text-muted-foreground uppercase block">Transport</span>
-                      <span className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-bold inline-block mt-0.5">
+                      <span className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-medium inline-block mt-0.5">
                         {server.transport}
                       </span>
                     </div>
@@ -191,7 +191,7 @@ export function McpServersView({}: McpServersViewProps) {
                             </span>
                           ))}
                           {serverTools.length > 3 && (
-                            <span className="text-[9px] text-muted-foreground font-semibold flex items-center">
+                            <span className="text-[9px] text-muted-foreground font-medium flex items-center">
                               +{serverTools.length - 3} more
                             </span>
                           )}
@@ -220,19 +220,19 @@ export function McpServersView({}: McpServersViewProps) {
         </div>
       )}
 
-      <div className="p-5 bg-muted/20 border border-border rounded-2xl space-y-3">
+      <div className="p-5 app-glass rounded-2xl space-y-3">
         <div className="flex items-center gap-2">
           <Info size={16} className="text-accent" />
-          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">What is an MCP Server?</h4>
+          <h4 className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">What is an MCP Server?</h4>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Model Context Protocol (MCP) servers expose tools and resources that AI models can safely query or invoke. ArmorIQ dynamically registers these servers at runtime and applies safety, risk evaluation, and approval rule guardrails before any action execution.
         </p>
         <div className="space-y-1.5 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground">Supported transports:</p>
-          <ul className="list-disc list-inside space-y-1 pl-1">
-            <li><span className="font-bold text-foreground font-mono">stdio:</span> Local process transport execution (e.g., node scripts).</li>
-            <li><span className="font-bold text-foreground font-mono">SSE:</span> Server-Sent Events transport running over HTTP (e.g., remote services).</li>
+          <ul className="list-disc list-inside space-y-1 pl-1 font-medium">
+            <li><span className="font-semibold text-foreground font-mono">stdio:</span> Local process transport execution (e.g., node scripts).</li>
+            <li><span className="font-semibold text-foreground font-mono">SSE:</span> Server-Sent Events transport running over HTTP (e.g., remote services).</li>
           </ul>
         </div>
       </div>
@@ -261,9 +261,9 @@ interface ServerDetailsDrawerProps {
 function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDrawerProps) {
   const badgeColor =
     status.state === "healthy"
-      ? "bg-green-500/10 text-green-500 border border-green-500/20"
+      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
       : status.state === "offline"
-      ? "bg-red-500/10 text-red-500 border border-red-500/20"
+      ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
       : "bg-stone-500/10 text-stone-500 border border-stone-500/20";
 
   return (
@@ -281,10 +281,10 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 220 }}
-        className="relative w-full sm:max-w-md bg-card border-l border-border h-full flex flex-col shadow-2xl z-10 overflow-hidden"
+        className="relative w-full sm:max-w-md app-glass border-y-0 border-r-0 h-full flex flex-col shadow-2xl z-10 overflow-hidden"
       >
-        <div className="h-16 border-b border-border bg-card flex items-center justify-between px-6 shrink-0">
-          <h3 className="text-sm font-bold text-foreground">Server Details</h3>
+        <div className="h-16 border-b border-border bg-transparent flex items-center justify-between px-6 shrink-0">
+          <h3 className="text-sm font-semibold text-foreground">Server Details</h3>
           <button
             onClick={onClose}
             className="p-1.5 hover:bg-muted/60 text-muted-foreground rounded-lg cursor-pointer transition-colors"
@@ -296,33 +296,33 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="bg-background/40 p-5 rounded-2xl border border-border space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase text-muted-foreground">Server Name</span>
-              <span className="text-xs text-foreground font-bold">{server.name}</span>
+              <span className="text-[10px] font-mono font-medium uppercase text-muted-foreground">Server Name</span>
+              <span className="text-xs text-foreground font-semibold">{server.name}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase text-muted-foreground">Connection</span>
-              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${badgeColor}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${status.state === "healthy" ? "bg-green-500" : (status.state === "offline" ? "bg-red-500" : "bg-stone-500")} animate-pulse`} />
+              <span className="text-[10px] font-mono font-medium uppercase text-muted-foreground">Connection</span>
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-medium uppercase tracking-wider ${badgeColor}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${status.state === "healthy" ? "bg-emerald-500" : (status.state === "offline" ? "bg-rose-500" : "bg-stone-500")} animate-pulse`} />
                 {status.status}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase text-muted-foreground">Transport</span>
-              <span className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-bold">
+              <span className="text-[10px] font-mono font-medium uppercase text-muted-foreground">Transport</span>
+              <span className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-medium">
                 {server.transport}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold uppercase text-muted-foreground">Total Tools</span>
-              <span className="text-xs text-foreground font-bold">{tools.length}</span>
+              <span className="text-[10px] font-mono font-medium uppercase text-muted-foreground">Total Tools</span>
+              <span className="text-xs text-foreground font-semibold">{tools.length}</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
               Configuration Details
             </h4>
             {server.transport === "stdio" ? (
@@ -334,7 +334,7 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
                 {server.args && server.args.length > 0 && (
                   <div>
                     <span className="text-[9px] font-mono text-muted-foreground uppercase">Command Arguments</span>
-                    <pre className="text-[10px] font-mono bg-background/50 border border-border p-2.5 rounded-lg overflow-x-auto text-foreground mt-0.5">
+                    <pre className="text-[10px] font-mono bg-background/50 border border-border p-2.5 rounded-lg overflow-x-auto text-foreground mt-0.5 no-scrollbar">
                       {server.args.join(" ")}
                     </pre>
                   </div>
@@ -351,23 +351,23 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
               Health Metrics
             </h4>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Runtime Status</span>
-                <span className="font-semibold text-foreground">{status.status}</span>
+                <span className="font-medium text-foreground">{status.status}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Discovery Mode</span>
-                <span className="font-semibold text-foreground">Dynamic Registry</span>
+                <span className="font-medium text-foreground">Dynamic Registry</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Available Tools</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Tools</h4>
             <div className="space-y-2">
               {tools.length === 0 ? (
                 <div className="p-3 text-center border border-border bg-background/25 rounded-xl text-xs text-muted-foreground">
@@ -378,12 +378,12 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
                   {tools.map((t) => (
                     <div key={t.id} className="p-3 flex items-center justify-between text-xs hover:bg-muted/10">
                       <div>
-                        <span className="font-mono font-bold text-foreground">{t.toolName}</span>
+                        <span className="font-mono font-semibold text-foreground">{t.toolName}</span>
                         <span className="text-[10px] text-muted-foreground block truncate max-w-[200px] mt-0.5">
                           {t.description}
                         </span>
                       </div>
-                      <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-bold">
+                      <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-muted text-muted-foreground border border-border font-medium">
                         {t.finalRisk} Risk
                       </span>
                     </div>
@@ -394,14 +394,14 @@ function ServerDetailsDrawer({ server, tools, status, onClose }: ServerDetailsDr
           </div>
 
           <details className="group border border-border rounded-xl bg-background/25 overflow-hidden">
-            <summary className="flex items-center justify-between p-3.5 text-xs font-bold text-muted-foreground cursor-pointer select-none group-open:border-b group-open:border-border transition-colors hover:text-foreground">
+            <summary className="flex items-center justify-between p-3.5 text-xs font-semibold text-muted-foreground cursor-pointer select-none group-open:border-b group-open:border-border transition-colors hover:text-foreground">
               <span className="flex items-center gap-1.5">
                 <Terminal size={14} />
                 Raw Configuration
               </span>
             </summary>
             <div className="p-3.5 bg-background/50">
-              <pre className="text-[9px] font-mono overflow-x-auto text-muted-foreground max-h-48 leading-relaxed">
+              <pre className="text-[9px] font-mono overflow-x-auto text-muted-foreground max-h-48 leading-relaxed no-scrollbar">
                 {JSON.stringify(server, null, 2)}
               </pre>
             </div>
