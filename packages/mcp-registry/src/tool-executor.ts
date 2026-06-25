@@ -29,6 +29,7 @@ export async function executeTool(
         new StdioClientTransport({
           command: server.command!,
           args: server.args ?? [],
+          env: process.env as Record<string, string>,
         });
 
       await client.connect(

@@ -1,36 +1,36 @@
-//single global source of truth for mcp servers
-//registry bootstraps from here 
+// Single global source of truth for all MCP servers.
+// The registry bootstraps itself from this configuration.
 
+import type { MCPServerConfig } from "@armoriq/shared-types";
 
-import type {
-  MCPServerConfig,
-} from "@armoriq/shared-types";
+export const MCP_SERVERS: MCPServerConfig[] = [
+  {
+    id: "infra-mcp",
 
-export const MCP_SERVERS: MCPServerConfig[] =
-  [
-    {
-      id: "infra-mcp",
+    name: "Infrastructure MCP",
 
-      name:
-        "Infrastructure MCP",
+    transport: "stdio",
 
-      transport: "stdio",
+    command: "node",
 
-      command: "node",
+    args: [
+      "../custom-mcp/dist/index.js",
+    ],
+  },
 
-      args: [
-        "../custom-mcp/dist/index.js",
-      ],
-    },
+  {
+    id: "context7",
 
-    {
-      id: "context7",
+    name: "Context7",
 
-      name: "Context7",
+    transport: "stdio",
 
-      transport: "sse",
+    command: "node",
 
-      url: process.env
-        .CONTEXT7_MCP_URL!,
-    },
-  ];
+    args: [
+      "./node_modules/@upstash/context7-mcp/dist/index.js",
+      "--api-key",
+      process.env.CONTEXT7_API_KEY!,
+    ],
+  },
+];
