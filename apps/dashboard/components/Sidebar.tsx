@@ -5,10 +5,11 @@ import {
   ShieldCheck, 
   Wrench, 
   ClipboardCheck, 
-  FileCode2 
+  FileCode2,
+  ShieldAlert
 } from "lucide-react";
 
-export type TabType = "overview" | "policies" | "catalog" | "approvals" | "logs";
+export type TabType = "overview" | "policies" | "catalog" | "approvals" | "logs" | "playground";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -22,7 +23,9 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
     { id: "catalog" as const, label: "Tool Catalog", icon: Wrench },
     { id: "approvals" as const, label: "Approval Queue", icon: ClipboardCheck },
     { id: "logs" as const, label: "Audit Logs", icon: FileCode2 },
+    { id: "playground" as const, label: "Prompt Security", icon: ShieldAlert },
   ];
+
 
   return (
     <aside className="w-64 border-r border-border bg-card flex flex-col shrink-0">

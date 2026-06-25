@@ -7,6 +7,7 @@ import { PoliciesView } from "../components/PoliciesView";
 import { ToolCatalogView } from "../components/ToolCatalogView";
 import { ApprovalQueueView } from "../components/ApprovalQueueView";
 import { AuditLogsView } from "../components/AuditLogsView";
+import { PromptPlaygroundView } from "../components/PromptPlaygroundView";
 import { Activity, ShieldCheck } from "lucide-react";
 
 export default function Home() {
@@ -24,10 +25,13 @@ export default function Home() {
         return "Action Approval Queue";
       case "logs":
         return "Audit Trails";
+      case "playground":
+        return "Prompt Security Playground";
       default:
         return "Dashboard";
     }
   }
+
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -72,8 +76,12 @@ export default function Home() {
           {activeTab === "logs" && (
             <AuditLogsView />
           )}
+          {activeTab === "playground" && (
+            <PromptPlaygroundView />
+          )}
         </main>
       </div>
     </div>
   );
 }
+
