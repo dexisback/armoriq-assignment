@@ -18,11 +18,13 @@ async function main() {
   const app =
     createServer();
 
+  const port = process.env.PORT || 4000;
+
   app.listen(
-    3000,
+    port,
     () => {
       console.log(
-        "Agent listening on :3000"
+        `Agent listening on :${port}`
       );
     }
   );
