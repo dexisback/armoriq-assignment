@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, TabType } from "../components/Sidebar";
 import { OverviewView } from "../components/OverviewView";
 import { PoliciesView } from "../components/PoliciesView";
@@ -9,10 +9,23 @@ import { McpServersView } from "../components/McpServersView";
 import { ApprovalQueueView } from "../components/ApprovalQueueView";
 import { AuditLogsView } from "../components/AuditLogsView";
 import { PromptPlaygroundView } from "../components/PromptPlaygroundView";
-import { ShieldCheck } from "lucide-react";
+import { CommandSearchModal } from "../components/CommandSearchModal";
+import { ShieldCheck, Search } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((open) => !open);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function getTabTitle() {
     switch (activeTab) {
@@ -46,6 +59,16 @@ export default function Home() {
             <h2 className="text-sm font-bold text-foreground tracking-tight">
               {getTabTitle()}
             </h2>
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all duration-150 cursor-pointer"
+            >
+              <Search size={12} className="opacity-80" />
+              <span>Search...</span>
+              <kbd className="pointer-events-none rounded bg-card px-1.5 font-mono text-[9px] text-muted-foreground/60 border border-border/30">
+                ⌘K
+              </kbd>
+            </button>
           </div>
 
           <div className="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
@@ -85,6 +108,12 @@ export default function Home() {
           )}
         </main>
       </div>
+
+      <CommandSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onNavigate={setActiveTab}
+      />
     </div>
   );
 }

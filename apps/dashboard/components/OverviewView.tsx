@@ -30,11 +30,17 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
   async function fetchDashboardData() {
     try {
+      const fetchJson = (url: string) =>
+        fetch(url).then((r) => {
+          if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+          return r.json();
+        });
+
       const [toolsRes, rulesRes, approvalsRes, logsRes] = await Promise.all([
-        fetch("/api/tools").then(r => r.json()),
-        fetch("/api/rules").then(r => r.json()),
-        fetch("/api/approvals").then(r => r.json()),
-        fetch("/api/logs").then(r => r.json()),
+        fetchJson("/api/tools"),
+        fetchJson("/api/rules"),
+        fetchJson("/api/approvals"),
+        fetchJson("/api/logs"),
       ]);
 
       const activeRules = rulesRes.filter((r: any) => r.enabled).length;
