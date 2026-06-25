@@ -10,7 +10,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx scripts/seed.ts",
-    "test:agent": "tsx scripts/test-agent.ts"
+    "test:agent": "tsx scripts/test-agent.ts",
+    "dev:agent": "...",
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "dev": "concurrently \"pnpm dev:agent\" \"pnpm dev:dashboard\""
+    
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

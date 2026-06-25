@@ -24,6 +24,6 @@
       "@armoriq/shared-types": ["packages/shared-types/src/index.ts"]
     }
   },
-  "include": ["apps/**/*.ts", "packages/**/*.ts", "prisma/**/*.ts", "scripts/**/*.ts", "*.ts", "apps/agent/src/services/redis-publisher.service.ts"],
+  "include": ["apps/agent/src/**/*.ts", "apps/custom-mcp/src/**/*.ts", "packages/**/*.ts", "prisma/**/*.ts", "scripts/**/*.ts", "*.ts"],
   "exclude": ["node_modules", "dist"]
 }
