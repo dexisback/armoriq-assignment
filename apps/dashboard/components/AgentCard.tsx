@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Conversation } from "./Conversation";
 import { PromptInput } from "./PromptInput";
-import { SuggestedPrompts } from "./SuggestedPrompts";
+import { QuickTestScenarios } from "./QuickTestScenarios";
 import { ChatMessage } from "./MessageBubble";
-import { Bot, Terminal } from "lucide-react";
+import { Bot } from "lucide-react";
 
 export function AgentCard() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -60,7 +60,6 @@ export function AgentCard() {
     const trimmed = inputVal.trim();
     if (!trimmed || chatMutation.isPending) return;
 
-    // 1. Add user message
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}-user`,
       role: "user",
@@ -70,8 +69,6 @@ export function AgentCard() {
     
     setMessages((prev) => [...prev, userMsg]);
     setInputVal("");
-
-    // 2. Trigger mutation API call
     chatMutation.mutate(trimmed);
   }
 
@@ -79,9 +76,20 @@ export function AgentCard() {
     setInputVal(prompt);
   }
 
+  function handleRunPrompt(prompt: string) {
+    if (chatMutation.isPending) return;
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}-user`,
+      role: "user",
+      content: prompt,
+      createdAt: new Date(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    chatMutation.mutate(prompt);
+  }
+
   return (
     <div className="flex flex-col h-full min-h-[500px] bg-card border border-border rounded-2xl p-6 shadow-sm">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
         <Bot size={16} className="text-accent" />
         <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
@@ -89,20 +97,18 @@ export function AgentCard() {
         </h3>
       </div>
 
-      {/* Conversation Area */}
       <div className="flex-1 flex flex-col min-h-0 mb-4">
         <Conversation messages={messages} loading={chatMutation.isPending} />
       </div>
 
-      {/* Suggested Prompts */}
-      <div className="mb-4">
-        <SuggestedPrompts 
-          onSelectPrompt={handleSelectPrompt} 
+      <div className="mb-6">
+        <QuickTestScenarios 
+          onSelectPrompt={handleSelectPrompt}
+          onRunPrompt={handleRunPrompt}
           disabled={chatMutation.isPending} 
         />
       </div>
 
-      {/* Input area */}
       <div className="space-y-2">
         <PromptInput 
           value={inputVal}
@@ -111,7 +117,6 @@ export function AgentCard() {
           disabled={chatMutation.isPending}
         />
         
-        {/* Warning Note */}
         <p className="text-[10px] text-muted-foreground font-semibold italic">
           This chat interacts with the live AI agent. Tool calls are evaluated by the Policy Engine before execution.
         </p>
