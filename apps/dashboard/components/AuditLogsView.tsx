@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Search, Info, X, ShieldAlert, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ApprovalDetailsDrawer } from "./ApprovalDetailsDrawer";
+import { RequestTimeline } from "./RequestTimeline";
 
 export function AuditLogsView() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -249,6 +250,10 @@ export function AuditLogsView() {
                   </pre>
                 </div>
               )}
+
+              <div className="border-t border-border pt-4">
+                <RequestTimeline targetLog={selectedLog} allLogs={logs} />
+              </div>
 
               {/* Extra stats */}
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[10px] text-muted-foreground border-t border-border pt-4">

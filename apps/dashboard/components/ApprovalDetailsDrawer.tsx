@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Copy, Check, Terminal, MessageSquare, Shield, Clock, Info } from "lucide-react";
+import { X, Copy, Check, Terminal, MessageSquare, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { RequestTimeline } from "./RequestTimeline";
 
 interface ApprovalDetailsDrawerProps {
   approval: any;
@@ -254,6 +255,22 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
                       This tool execution matched an active approval rule and requires administrator authorization before execution.
                     </p>
                   </div>
+                </div>
+
+                <div className="border-t border-border pt-4">
+                  <RequestTimeline 
+                    targetLog={matchedLog || {
+                      id: approval.id,
+                      toolName: approval.toolName,
+                      arguments: approval.arguments,
+                      decision: "REQUIRE_APPROVAL",
+                      riskLevel: "MEDIUM",
+                      eventType: "APPROVAL_CREATED",
+                      createdAt: approval.requestedAt || approval.createdAt,
+                      trace: { approvalId: approval.id, matchedRule: "Approval Required" }
+                    }} 
+                    allLogs={logs} 
+                  />
                 </div>
 
                 <div className="space-y-3">

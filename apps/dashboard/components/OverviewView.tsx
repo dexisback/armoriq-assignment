@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AgentCard } from "./AgentCard";
 import { SystemStatusPanel } from "./SystemStatusPanel";
+import { RequestTimeline } from "./RequestTimeline";
 import { 
   ShieldCheck, 
   Wrench, 
@@ -23,6 +24,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
   });
   const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function fetchDashboardData() {
@@ -45,6 +47,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
       setPendingApprovals(approvalsRes || []);
       setRecentLogs(logsRes.slice(0, 4) || []);
+      setAllLogs(logsRes || []);
     } catch (err) {
       console.error("Dashboard poll failed", err);
     } finally {
@@ -76,6 +79,11 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 lg:col-span-7 flex flex-col gap-6">
         <AgentCard />
+        {recentLogs.length > 0 && (
+          <div className="p-5 rounded-2xl bg-card border border-border shadow-sm">
+            <RequestTimeline targetLog={recentLogs[0]} allLogs={allLogs} />
+          </div>
+        )}
       </div>
 
       <div className="col-span-12 lg:col-span-5 flex flex-col gap-6">
