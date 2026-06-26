@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.resolve(__dirname, "../../../.env");
+//dotenv.config();
 dotenv.config({ path: envPath });
 
 const { bootstrap } = await import("./bootstrap/index.js");

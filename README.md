@@ -1,95 +1,589 @@
+<div align="center">
+
 # ArmorIQ
 
-An AI Agent Security Platform. A policy-first execution layer that sits between LLMs and the external tools they invoke, ensuring every tool call is evaluated against administrator-defined guardrails before execution.
+### Guarded AI Agent with Dynamic Policy Enforcement and Model Context Protocol (MCP) Support
 
-## Repository Structure
+A production-inspired AI agent runtime that sits between Large Language Models and external tools, enforcing configurable guardrails before every tool invocation.
 
-```
-armoriq-assignment/
-├── apps/
-│   ├── agent/          # Express backend — AI agent runtime, LLM orchestration, tool loop, policy enforcement
-│   ├── custom-mcp/     # Custom MCP server — infrastructure management tools (restart, deploy, rollback, logs)
-│   └── dashboard/      # Next.js frontend — admin console for managing policies, approvals, and audit logs
-├── packages/
-│   ├── db/             # Prisma client, database schema, and migrations
-│   ├── logger/         # Structured logging utility
-│   ├── mcp-registry/   # MCP tool discovery and registration
-│   ├── policy-engine/  # Core policy evaluation engine (standalone, no framework dependencies)
-│   └── shared-types/   # TypeScript types shared across apps and packages
-├── prisma/             # Prisma schema and migration files
-├── docs/               # Complete engineering documentation
-├── scripts/            # Build and utility scripts
-├── pnpm-workspace.yaml # pnpm monorepo config
-├── turbo.json          # Turborepo pipeline config
-└── prisma.config.ts    # Prisma configuration
-```
+Built as part of the ArmorIQ Software Engineer Internship Assignment.
 
-## Documentation
+---
 
-Full engineering documentation is available in the [`docs/`](https://github.com/dexisback/armoriq-assignment/tree/main/docs) directory:
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
+![Express](https://img.shields.io/badge/Express-5-lightgrey)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)
+![Redis](https://img.shields.io/badge/Redis-Pub/Sub-red)
+![MCP](https://img.shields.io/badge/Model_Context_Protocol-MCP-success)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-| Document | Description |
-|---|---|
-| [00 — Project Overview](https://github.com/dexisback/armoriq-assignment/blob/main/docs/00.md) | Project philosophy, problem statement, feature inventory, engineering principles, monorepo architecture |
-| [01 — Backend Architecture](https://github.com/dexisback/armoriq-assignment/blob/main/docs/01-backend-architecture.md) | Deep dive into backend services, package architecture, runtime request lifecycle |
-| [02 — API Reference](https://github.com/dexisback/armoriq-assignment/blob/main/docs/02-api-reference.md) | Complete REST API reference — `/chat`, `/rules`, `/tools`, `/approvals`, `/logs`, `/health` |
-| [03 — Policy Engine](https://github.com/dexisback/armoriq-assignment/blob/main/docs/03-policy-engine.md) | Policy evaluation pipeline, rule types, priority system, Redis sync, caching |
-| [04 — Security Model](https://github.com/dexisback/armoriq-assignment/blob/main/docs/04-security-model.md) | Policy-first execution, trust boundaries, prompt injection handling, human approval model |
-| [05 — System Design](https://github.com/dexisback/armoriq-assignment/blob/main/docs/05-system-design.md) | Architectural decisions, tradeoffs, runtime design, future evolution |
+</div>
+
+---
+
+## Overview
+
+ArmorIQ is a secure AI agent platform built around one central idea:
+
+> AI models should decide *what* they want to do, but independent infrastructure should decide *whether they are allowed to do it.*
+
+Instead of allowing an LLM to directly invoke external tools, ArmorIQ inserts a dedicated Policy Engine between the model and every MCP tool execution.
+
+Every tool request is evaluated against administrator-defined runtime policies before execution.
+
+This architecture enables:
+
+- Dynamic tool authorization
+- Human approval workflows
+- Runtime policy updates
+- Prompt injection monitoring
+- Centralized audit logging
+- Live MCP tool discovery
+
+The platform follows the Model Context Protocol (MCP), allowing tools to be discovered dynamically from both local and remote MCP servers without requiring application changes.
+
+---
+
+## Assignment Goals
+
+This project implements all core requirements from the ArmorIQ Software Engineer assignment.
+
+| Requirement | Status |
+|-------------|:------:|
+| AI Agent with Tool Loop | ✅ |
+| Dynamic MCP Tool Discovery | ✅ |
+| Custom MCP Server | ✅ |
+| Remote MCP Server (Context7) | ✅ |
+| Isolated Policy Engine | ✅ |
+| Runtime Rule Updates | ✅ |
+| Human Approval Flow | ✅ |
+| Prompt Injection Detection | ✅ |
+| Audit Logging | ✅ |
+| Administrative Dashboard | ✅ |
+
+---
+
+## Key Features
+
+### AI Agent
+
+- Gemini-powered tool-using agent
+- Multi-turn tool execution loop
+- Dynamic MCP tool discovery
+- Provider-agnostic architecture
+
+### Policy Engine
+
+- Runtime-configurable authorization
+- Block Tool policies
+- Require Approval policies
+- Input Validation policies
+- Token Budget enforcement
+- Risk-based authorization
+- Deterministic rule evaluation
+
+### MCP Runtime
+
+- Dynamic server registration
+- Local custom MCP server
+- Remote Context7 MCP integration
+- Runtime tool synchronization
+- Automatic Tool Catalog generation
+
+### Administrative Dashboard
+
+- Policy management
+- Live tool catalog
+- Approval queue
+- Conversation logs
+- Prompt injection events
+- Runtime health monitoring
+- Interactive AI chat playground
+
+---
 
 ## Architecture
 
+```mermaid
+graph TD
+    User([User]) --> Dashboard[Administrative Dashboard]
+    User --> Agent
+
+    subgraph "AI Agent Runtime"
+        Agent[AI Agent]
+        Agent --> LLM[LLM Provider<br/>Gemini / Groq]
+        LLM --> Agent
+        Agent -->|Tool Request| PE[Policy Engine]
+        PE -->|ALLOW / DENY / APPROVAL| Agent
+    end
+
+    subgraph "Policy Engine"
+        PE --> Rules[(Active Rules)]
+        PE --> RiskTable[(Risk Overrides)]
+    end
+
+    subgraph "MCP Runtime"
+        Agent --> Registry[MCP Registry]
+        Registry --> CustomMCP[Custom MCP Server<br/>Infrastructure Tools]
+        Registry --> Context7MCP[Context7 MCP Server<br/>Library Documentation]
+    end
+
+    Dashboard -->|Manage Policies| PE
+    Dashboard -->|View Tools| Registry
+    Dashboard -->|Approve / Deny| Agent
+
+    Agent --> Audit[(Audit Logs)]
+    Registry -->|Tool Sync| ToolCatalog[(Tool Catalog)]
 ```
-User Prompt → Agent (Express) → LLM (Gemini/Groq)
-                    ↓
-              Policy Engine ← Rules DB (SQLite)
-                    ↓
-              MCP Registry → Custom MCP Server
-                    ↓
-              Tool Execution or Approval Queue
-                    ↓
-              Audit Logs
+
+---
+
+## Design Principles
+
+The architecture is built around several core principles.
+
+- Authorization is centralized.
+- Tool discovery is dynamic.
+- Runtime behavior is configuration-driven.
+- Security decisions are deterministic.
+- AI reasoning is separated from infrastructure authorization.
+- Components communicate through well-defined boundaries.
+- The platform remains extensible as additional MCP servers and policy types are introduced.
+
+---
+
+## Documentation
+
+Detailed engineering documentation is available inside the `docs/` directory.
+
+| Document | Description |
+|----------|-------------|
+| `00.md` | Project philosophy, problem statement, feature inventory, monorepo architecture |
+| `01-backend-architecture.md` | Backend architecture, services, runtime request lifecycle |
+| `02-api-reference.md` | Complete REST API reference for all endpoints |
+| `03-policy-engine.md` | Policy evaluation pipeline, rule types, priority system, caching |
+| `04-security-model.md` | Policy-first execution, trust boundaries, prompt injection handling |
+| `05-system-design.md` | Architectural decisions, tradeoffs, runtime design, future evolution |
+
+The README provides a high-level overview, while the documentation covers implementation details and design rationale.
+
+## Technology Stack
+
+ArmorIQ is built as a TypeScript monorepo with a clear separation between runtime services, shared packages and the administrative dashboard.
+
+| Layer | Technology |
+|--------|------------|
+| Frontend | Next.js 16, React 19, TypeScript |
+| Styling | Tailwind CSS v4, shadcn/ui, Framer Motion |
+| Backend | Express 5, TypeScript |
+| AI Provider | Google Gemini |
+| Protocol | Model Context Protocol (MCP) |
+| Local MCP | Custom Infrastructure MCP Server |
+| Remote MCP | Context7 MCP Server |
+| Database | PostgreSQL (Neon) |
+| ORM | Prisma |
+| Cache / Messaging | Redis (Upstash) |
+| Runtime Sync | Redis Pub/Sub |
+| Package Manager | pnpm Workspaces |
+| Language | TypeScript |
+| Deployment | Vercel + Render |
+
+---
+
+## Repository Structure
+
+```text
+.
+├── apps
+│   ├── agent              # AI Agent runtime
+│   ├── dashboard          # Administrative dashboard
+│   └── custom-mcp         # Infrastructure MCP server
+│
+├── packages
+│   ├── db                 # Prisma client
+│   ├── logger             # Shared logging utilities
+│   ├── mcp-registry       # MCP discovery & execution
+│   ├── policy-engine      # Runtime authorization engine
+│   └── shared-types       # Shared interfaces & schemas
+│
+├── prisma
+│
+├── docs
+│
+└── README.md
 ```
 
-The **Agent** (apps/agent) receives user prompts, communicates with LLMs, runs a tool loop, evaluates every tool call through the **Policy Engine** (packages/policy-engine), and only executes tools that pass policy checks. Blocked actions enter the **Approval Queue** for human review. All decisions are recorded in the **Audit Log**.
+The repository follows a monorepo architecture where reusable runtime components are extracted into independent workspace packages. This keeps the Policy Engine, MCP Registry and shared contracts framework-agnostic and reusable across applications.
 
-The **Dashboard** (apps/dashboard) is the admin console where security engineers manage policies, approve/reject tool executions, and inspect audit trails.
+---
 
-## Quick Start
+## Core Components
+
+The platform is composed of three primary applications.
+
+### AI Agent
+
+The backend runtime responsible for orchestrating the complete tool-use lifecycle.
+
+Responsibilities include:
+
+- Running the LLM tool loop
+- Discovering MCP tools
+- Evaluating policies
+- Executing authorized tools
+- Recording audit events
+- Managing approval workflows
+
+---
+
+### Administrative Dashboard
+
+A web interface used to configure and observe the running agent.
+
+Capabilities include:
+
+- Policy management
+- Tool catalog
+- Approval queue
+- Conversation logs
+- Prompt injection events
+- Runtime health monitoring
+- Interactive chat playground
+
+All dashboard changes are reflected by the running agent without requiring a restart.
+
+---
+
+### Custom MCP Server
+
+A standards-compliant MCP server implementing infrastructure management tools.
+
+Example tools include:
+
+- Restart Server
+- Deploy Release
+- Rollback Release
+- Get Server Status
+- View Infrastructure Logs
+
+The server is discovered dynamically by the MCP Registry without requiring any hardcoded tool definitions.
+
+---
+
+## Runtime Overview
+
+Every user request follows the same execution pipeline.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent as AI Agent
+    participant LLM as LLM Provider
+    participant PE as Policy Engine
+    participant Registry as MCP Registry
+    participant MCP as MCP Server
+    participant Audit as Audit Logs
+
+    User->>Agent: Submit prompt
+    Agent->>LLM: Send conversation
+    LLM-->>Agent: Tool call request
+    Agent->>PE: Evaluate tool request
+    alt POLICY ALLOWED
+        PE-->>Agent: ALLOW
+        Agent->>Registry: Execute tool
+        Registry->>MCP: Call tool
+        MCP-->>Registry: Tool result
+        Registry-->>Agent: Tool result
+    else POLICY BLOCKED
+        PE-->>Agent: DENY
+        Agent-->>User: Tool blocked by policy
+    else APPROVAL REQUIRED
+        PE-->>Agent: REQUIRE_APPROVAL
+        Agent->>Audit: Log pending approval
+        Agent-->>User: Awaiting human approval
+        Note over Agent: Admin approves / denies
+        Agent->>Registry: Execute tool (if approved)
+        Registry->>MCP: Call tool
+        MCP-->>Registry: Tool result
+        Registry-->>Agent: Tool result
+    end
+    Agent->>LLM: Tool result + conversation
+    LLM-->>Agent: Final response
+    Agent-->>User: Response
+    Agent->>Audit: Log execution event
+```
+
+The Policy Engine serves as the sole authorization boundary between AI reasoning and external tool execution, ensuring that every tool invocation is evaluated consistently before reaching an MCP server.
+
+
+## Getting Started
+
+### Prerequisites
+
+Before running the project, ensure the following tools are installed:
+
+- Node.js 22+
+- pnpm 10+
+- PostgreSQL (or a Neon database)
+- Redis (or Upstash Redis)
+- Google Gemini API Key
+- Context7 API Key
+
+---
+
+### Clone the Repository
 
 ```bash
-# Install dependencies
+git clone https://github.com/dexisback/armoriq-assignment.git
+
+cd armoriq-assignment
+```
+
+---
+
+### Install Dependencies
+
+```bash
 pnpm install
-
-# Generate Prisma client
-pnpm run db:generate
-
-# Run database migrations
-pnpm run db:migrate
-
-# Start all services in development
-pnpm run dev
 ```
 
-### Individual Services
+---
+
+### Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+DATABASE_URL=
+
+REDIS_URL=
+
+GEMINI_API_KEY=
+
+CONTEXT7_API_KEY=
+
+GROK_API_KEY=
+```
+
+> Adjust values to match your own API keys and service URLs.
+
+---
+
+### Build the Workspace
 
 ```bash
-# Agent backend (port 3000)
-pnpm --filter @armoriq/agent dev
-
-# Dashboard (port 3001)
-pnpm --filter @armoriq/dashboard dev
-
-# Custom MCP server
-pnpm --filter @armoriq/custom-mcp dev
+pnpm build
 ```
 
-## Tech Stack
+---
 
-- **Frontend:** Next.js 16, React 19, Tailwind CSS, Framer Motion, shadcn/ui
-- **Backend:** Express, TypeScript
-- **LLM Providers:** Gemini 2.5 Pro, Groq (Llama 4)
-- **Database:** SQLite via Prisma ORM
-- **Cache/PubSub:** Redis
-- **Build:** Turborepo + pnpm workspaces
-- **Protocol:** Model Context Protocol (MCP)
+### Start the Development Servers
+
+```bash
+pnpm dev
+```
+
+This starts:
+
+| Service | Port |
+|----------|------|
+| Dashboard | `3000` |
+| Agent API | `4000` |
+
+---
+
+## Available Scripts
+
+### Development
+
+```bash
+pnpm dev
+```
+
+Runs the dashboard and backend concurrently.
+
+---
+
+### Build
+
+```bash
+pnpm build
+```
+
+Builds every workspace package and application.
+
+---
+
+### Lint
+
+```bash
+pnpm lint
+```
+
+Runs linting across the workspace.
+
+---
+
+### Generate Prisma Client
+
+```bash
+pnpm prisma:generate
+```
+
+---
+
+### Run Database Migrations
+
+```bash
+pnpm prisma:migrate
+```
+
+---
+
+### Seed Database
+
+```bash
+pnpm seed
+```
+
+---
+
+### Run Agent Only
+
+```bash
+pnpm dev:agent
+```
+
+---
+
+### Run Dashboard Only
+
+```bash
+pnpm dev:dashboard
+```
+
+---
+
+## Verifying the Installation
+
+After the development servers have started successfully:
+
+- Open `http://localhost:3000`
+- Navigate to the Dashboard Overview
+- Confirm that the Agent reports a healthy status
+- Verify that both MCP servers appear in the MCP Registry page
+- Open the Tool Catalog and confirm tools have been discovered
+- Open the Chat Console and submit a prompt requiring tool usage
+- Check the Audit Logs to verify that execution events are being recorded
+
+If all of the above work successfully, the platform has been configured correctly.
+
+---
+
+## Documentation
+
+Detailed implementation notes are available in the `docs/` directory.
+
+| File | Description |
+|------|-------------|
+| `00.md` | Project philosophy, problem statement, feature inventory, monorepo architecture |
+| `01-backend-architecture.md` | Backend architecture, services, runtime request lifecycle |
+| `02-api-reference.md` | Complete REST API reference for all endpoints |
+| `03-policy-engine.md` | Policy evaluation pipeline, rule types, priority system, caching |
+| `04-security-model.md` | Policy-first execution, trust boundaries, prompt injection handling |
+| `05-system-design.md` | Architectural decisions, tradeoffs, runtime design, future evolution |
+
+The README intentionally focuses on project usage and architecture, while the engineering handbook provides a deeper explanation of the implementation.
+
+
+
+## Screenshots
+
+> Screenshots will be added after deployment.
+
+---
+
+## Roadmap
+
+The current implementation satisfies all core assignment requirements while leaving room for future expansion.
+
+Planned improvements include:
+
+- Automatic execution continuation after human approval
+- WebSocket-based live dashboard updates
+- Policy versioning and rollback
+- Role-Based Access Control (RBAC)
+- Attribute-Based Access Control (ABAC)
+- Multi-stage approval workflows
+- Cryptographically signed audit logs
+- Policy simulation before deployment
+- Rule conflict visualization
+- Multi-agent support
+- Execution replay
+- Distributed policy synchronization
+- Additional remote MCP integrations
+
+---
+
+## Assignment Requirements
+
+| Requirement | Status |
+|-------------|:------:|
+| AI Agent | ✅ |
+| Tool-use loop | ✅ |
+| Dynamic MCP discovery | ✅ |
+| Custom MCP server | ✅ |
+| Remote MCP server | ✅ |
+| Policy Engine | ✅ |
+| Runtime rule updates | ✅ |
+| Human approval workflow | ✅ |
+| Prompt injection detection | ✅ |
+| Audit logging | ✅ |
+| Administrative dashboard | ✅ |
+
+---
+
+## Contributing
+
+This repository was developed as part of the ArmorIQ Software Engineer Internship Assignment and is not currently accepting external contributions.
+
+If you'd like to discuss the implementation or architecture, feel free to open an issue or reach out.
+
+---
+
+## License
+
+This project is released under the MIT License.
+
+See the `LICENSE` file for additional details.
+
+---
+
+## Acknowledgements
+
+This project builds upon several excellent open-source technologies.
+
+- Model Context Protocol (MCP)
+- Next.js
+- Express
+- Prisma
+- Neon
+- Upstash Redis
+- Google Gemini
+- Context7
+- shadcn/ui
+- Framer Motion
+- TypeScript
+
+Special thanks to the ArmorIQ team for designing an assignment that emphasizes runtime architecture, authorization, and secure AI systems over traditional CRUD applications.
+
+---
+
+<div align="center">
+
+Built with ❣️ by amaan/dexterworks
+
+</div>
+
+
