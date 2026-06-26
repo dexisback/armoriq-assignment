@@ -51,6 +51,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          DATABASE_URL: postgresql://placeholder@localhost:5432/placeholder
 
       - name: Test
         run: pnpm test
