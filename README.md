@@ -319,6 +319,20 @@ The Policy Engine serves as the sole authorization boundary between AI reasoning
 
 ## Getting Started
 
+> **Want to skip local setup?** This project is fully containerized. Clone, add a `.env`, and run one command:
+>
+> ```bash
+> git clone https://github.com/dexisback/armoriq-assignment.git
+> cd armoriq-assignment
+> cp .env.example .env
+> # fill in your API keys
+> docker compose up --build
+> ```
+>
+> Dashboard: **http://localhost:3000** — Agent: **http://localhost:4000**
+>
+> See the [Docker](#docker) section below for details.
+
 ### Prerequisites
 
 Before running the project, ensure the following tools are installed:
@@ -462,6 +476,82 @@ pnpm dev:agent
 ```bash
 pnpm dev:dashboard
 ```
+
+---
+
+## Docker
+
+The project ships with a production-quality Docker setup. A new contributor needs only Docker and a single `.env` file — no Node.js, pnpm, or database installation required.
+
+### What gets containerized
+
+| Service    | Image               | Port  | Description                          |
+|------------|---------------------|-------|--------------------------------------|
+| `agent`    | `Dockerfile.agent`    | 4000  | Express API + MCP registry + policy engine |
+| `dashboard`| `Dockerfile.dashboard`| 3000  | Next.js admin console                 |
+
+The **custom MCP server** is *not* a separate container — the agent launches it internally via stdio, exactly as in local development. Redis (Upstash) and PostgreSQL (Neon) remain external hosted services.
+
+### Quick start
+
+```bash
+git clone https://github.com/dexisback/armoriq-assignment.git
+cd armoriq-assignment
+cp .env.example .env
+# fill in DATABASE_URL, REDIS_URL, GEMINI_API_KEY, GROK_API_KEY, CONTEXT7_API_KEY
+docker compose up --build
+```
+
+Once both containers are healthy:
+
+- **Dashboard:** http://localhost:3000
+- **Agent API:** http://localhost:4000
+
+### Architecture inside Docker
+
+```mermaid
+graph LR
+    Browser([Browser]) -->|localhost:3000| Dash[dashboard<br/>Next.js]
+    Dash -->|http://agent:4000| Agent[agent<br/>Express + tsx]
+
+    Agent -->|stdio spawn| CustomMCP[custom-mcp<br/>Infrastructure Tools]
+    Agent -->|stdio spawn| Ctx7[context7<br/>Library Docs]
+    Agent -->|SQL| Neon[(Neon Postgres)]
+    Agent -->|Pub/Sub| Upstash[(Upstash Redis)]
+```
+
+### How the pieces fit together
+
+1. **Single `docker compose up --build`** builds both images and starts both services on a shared Docker network.
+2. The **agent container** installs workspace dependencies, generates the Prisma client, builds `custom-mcp`, and runs the agent via `tsx`. It keeps `custom-mcp` as an internal stdio child process — no extra container.
+3. The **dashboard container** builds Next.js with `AGENT_URL=http://agent:4000` baked into the rewrite config, so all `/api/*` requests are proxied to the agent over Docker networking.
+4. Both containers read secrets from a single `.env` file via `env_file:`.
+
+### Useful commands
+
+```bash
+# start in background
+docker compose up -d
+
+# view logs
+docker compose logs -f
+
+# view only the agent logs
+docker compose logs -f agent
+
+# stop
+docker compose down
+
+# rebuild from scratch (clears images + cache)
+docker compose down --rmi all && docker compose up --build
+```
+
+### Notes
+
+- The Docker setup does **not** change application architecture. `pnpm dev` continues to work locally exactly as before.
+- The Prisma client is generated at build time inside the agent image (output: `/app/generated/prisma`).
+- The custom MCP server is compiled at build time and launched by the agent via `node apps/custom-mcp/dist/index.js` (relative to `/app/apps/agent`).
+- `NEXT_PUBLIC_API_URL=http://agent:4000` is set in `docker-compose.yml` for client-side API calls.
 
 ---
 

@@ -1,0 +1,92 @@
+# syntax=docker/dockerfile:1.7
+
+# ---------- Stage 1: build ----------
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable
+
+# Copy workspace manifests for layer caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.json ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY apps/agent/package.json ./apps/agent/
+COPY apps/agent/tsconfig.json ./apps/agent/
+COPY apps/custom-mcp/package.json ./apps/custom-mcp/
+COPY apps/custom-mcp/tsconfig.json ./apps/custom-mcp/
+COPY packages/db/package.json ./packages/db/
+COPY packages/db/tsconfig.json ./packages/db/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/logger/tsconfig.json ./packages/logger/
+COPY packages/mcp-registry/package.json ./packages/mcp-registry/
+COPY packages/mcp-registry/tsconfig.json ./packages/mcp-registry/
+COPY packages/policy-engine/package.json ./packages/policy-engine/
+COPY packages/policy-engine/tsconfig.json ./packages/policy-engine/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/shared-types/tsconfig.json ./packages/shared-types/
+
+# Install ALL deps (includes tsx, tsc, etc.)
+RUN pnpm install --frozen-lockfile
+
+# Copy custom-mcp source for the build step
+COPY apps/custom-mcp ./apps/custom-mcp
+
+# Generate Prisma client (output: ./generated/prisma)
+# prisma generate only needs DATABASE_URL to satisfy the config schema;
+# the URL is never used at generate time.
+RUN DATABASE_URL="postgresql://placeholder@localhost:5432/placeholder" pnpm prisma:generate
+
+# Build custom-mcp (agent spawns this via stdio)
+RUN pnpm --filter @armoriq/custom-mcp build
+
+# Prune to production-only deps for the runner
+RUN pnpm prune --prod
+
+# ---------- Stage 2: runtime ----------
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+RUN corepack enable \
+ && apk add --no-cache libc6-compat
+
+ENV NODE_ENV=production
+
+# Copy workspace config
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.json ./
+COPY prisma.config.ts ./
+
+# Copy production node_modules (includes tsx, pnpm symlinks, .pnpm store)
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/agent/node_modules ./apps/agent/node_modules
+COPY --from=builder /app/apps/custom-mcp/node_modules ./apps/custom-mcp/node_modules
+COPY --from=builder /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=builder /app/packages/logger/node_modules ./packages/logger/node_modules
+COPY --from=builder /app/packages/mcp-registry/node_modules ./packages/mcp-registry/node_modules
+COPY --from=builder /app/packages/policy-engine/node_modules ./packages/policy-engine/node_modules
+COPY --from=builder /app/packages/shared-types/node_modules ./packages/shared-types/node_modules
+
+# Copy generated Prisma client
+COPY --from=builder /app/generated ./generated
+
+# Copy the built custom-mcp (compiled JS + package.json)
+COPY --from=builder /app/apps/custom-mcp/dist ./apps/custom-mcp/dist
+COPY --from=builder /app/apps/custom-mcp/package.json ./apps/custom-mcp/package.json
+
+# Copy agent source (runs via tsx)
+COPY apps/agent ./apps/agent
+
+# Copy workspace package sources (agent imports from these via tsx path aliases)
+COPY packages ./packages
+
+EXPOSE 4000
+
+# Working directory must be apps/agent so that:
+#   - ../custom-mcp/dist/index.js resolves correctly (mcp-servers.ts)
+#   - ./node_modules/@upstash/context7-mcp/... resolves correctly
+WORKDIR /app/apps/agent
+
+CMD ["pnpm", "start"]

@@ -1,0 +1,73 @@
+# syntax=docker/dockerfile:1.7
+
+# ---------- Stage 1: install ----------
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+RUN corepack enable
+
+# Copy workspace manifests
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.json ./
+COPY apps/dashboard/package.json ./apps/dashboard/
+COPY packages/shared-types/package.json ./packages/shared-types/
+
+RUN pnpm install --frozen-lockfile
+
+# ---------- Stage 2: build ----------
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/dashboard/node_modules ./apps/dashboard/node_modules
+COPY --from=deps /app/packages/shared-types/node_modules ./packages/shared-types/node_modules
+
+# Copy source
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.json ./
+COPY apps/dashboard ./apps/dashboard
+COPY packages/shared-types ./packages/shared-types
+
+# Build Next.js with AGENT_URL baked into the rewrite destination
+ARG AGENT_URL=http://agent:4000
+ENV AGENT_URL=${AGENT_URL}
+RUN pnpm --filter dashboard build
+
+# ---------- Stage 3: runner ----------
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+RUN corepack enable \
+ && apk add --no-cache libc6-compat
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Copy production node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/dashboard/node_modules ./apps/dashboard/node_modules
+COPY --from=builder /app/packages/shared-types/node_modules ./packages/shared-types/node_modules
+
+# Copy the built Next.js app
+COPY --from=builder /app/apps/dashboard/.next ./apps/dashboard/.next
+COPY --from=builder /app/apps/dashboard/public ./apps/dashboard/public
+COPY --from=builder /app/apps/dashboard/package.json ./apps/dashboard/package.json
+COPY --from=builder /app/apps/dashboard/next.config.ts ./apps/dashboard/next.config.ts
+
+# Copy shared types (needed at runtime for the rewrite/type resolution)
+COPY --from=builder /app/packages/shared-types ./packages/shared-types
+
+# Copy workspace config
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+EXPOSE 3000
+
+WORKDIR /app/apps/dashboard
+
+CMD ["pnpm", "start"]
