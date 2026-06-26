@@ -1,8 +1,21 @@
 import dotenv from "dotenv";
-import path from "path";
+// import path from "path";
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+// dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+// import dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
+
+const localEnvPath = path.resolve(process.cwd(), ".env");
+
+if (fs.existsSync(localEnvPath)) {
+  dotenv.config({
+    path: localEnvPath,
+  });
+} else {
+  dotenv.config();
+}
 async function main() {
   const { prisma } = await import("@armoriq/db");
   await prisma.rule.createMany({
