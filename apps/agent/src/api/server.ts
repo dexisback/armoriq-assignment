@@ -17,13 +17,13 @@ export function createServer() {
     express.json()
   );
 
-  app.use(chatRouter);
+ app.use("/api", chatRouter);
 
-  app.use(healthRouter);
-  app.use(approvalRouter)
-  app.use(logRouter)
-  app.use(toolRouter)
-  app.use(ruleRouter)
-  app.use(riskRouter)
+app.use("/api", healthRouter);
+app.use("/api", approvalRouter);
+app.use("/api", logRouter);
+app.use("/api", toolRouter);
+app.use("/api", ruleRouter);
+app.use("/api", riskRouter);
   return app;
 }
