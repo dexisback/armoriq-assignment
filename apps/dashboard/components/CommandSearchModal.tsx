@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { sound } from "./SoundSystem";
+import { api } from "../lib/api";
 
 interface CommandSearchModalProps {
   isOpen: boolean;
@@ -59,8 +60,8 @@ export function CommandSearchModal({
   useEffect(() => {
     async function fetchData() {
       try {
-        const fetchJson = (url: string) =>
-          fetch(url).then((r) => {
+        const fetchJson = (path: string) =>
+          api.get(path).then((r) => {
             if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
             return r.json();
           });

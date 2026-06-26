@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Shield } from "lucide-react";
+import { api } from "../lib/api";
 import {
   ToggleOn,
   ToggleOff,
@@ -58,8 +59,8 @@ export function PoliciesView() {
     try {
       setLoading(true);
       const [rulesRes, toolsRes] = await Promise.all([
-        fetch("/api/rules").then((r) => r.json()),
-        fetch("/api/tools").then((r) => r.json()),
+        api.get("/api/rules").then((r) => r.json()),
+        api.get("/api/tools").then((r) => r.json()),
       ]);
       setRules(rulesRes || []);
       setTools(toolsRes || []);
@@ -205,11 +206,7 @@ export function PoliciesView() {
         ),
       );
 
-      const res = await fetch(`/api/rules/${rule.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: updatedEnabled }),
-      });
+      const res = await api.patch(`/api/rules/${rule.id}`, { enabled: updatedEnabled });
 
       if (!res.ok) {
         throw new Error("Toggle update failed");
@@ -228,9 +225,7 @@ export function PoliciesView() {
       setRules((prev) => prev.filter((r) => r.id !== id));
       sound.playSuccess();
 
-      const res = await fetch(`/api/rules/${id}`, {
-        method: "DELETE",
-      });
+      const res = await api.delete(`/api/rules/${id}`);
 
       if (!res.ok) {
         throw new Error("Delete failed");
@@ -259,17 +254,9 @@ export function PoliciesView() {
       setSubmitting(true);
       let res;
       if (editingRuleId) {
-        res = await fetch(`/api/rules/${editingRuleId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        res = await api.patch(`/api/rules/${editingRuleId}`, payload);
       } else {
-        res = await fetch("/api/rules", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        res = await api.post("/api/rules", payload);
       }
 
       if (res.ok) {

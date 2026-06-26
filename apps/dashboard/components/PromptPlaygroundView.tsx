@@ -11,6 +11,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { sound } from "./SoundSystem";
+import { api } from "../lib/api";
 
 interface PromptScanData {
   suspicious: boolean;
@@ -60,7 +61,7 @@ export function PromptPlaygroundView() {
   const fetchPromptLogs = useCallback(async (): Promise<void> => {
     try {
       setLoadingLogs(true);
-      const res = await fetch("/api/logs");
+      const res = await api.get("/api/logs");
       const data = (await res.json()) as InjectionLog[];
       const injectionLogs = (data || []).filter(
         (l) => l.eventType === "PROMPT_INJECTION",
@@ -85,13 +86,9 @@ export function PromptPlaygroundView() {
     try {
       setScanning(true);
 
-      await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
-      });
+      await api.post("/api/chat", { message: trimmed });
 
-      const logsRes = (await fetch("/api/logs").then((r) =>
+      const logsRes = (await api.get("/api/logs").then((r) =>
         r.json(),
       )) as InjectionLog[];
       const newestLog = (logsRes || []).find(

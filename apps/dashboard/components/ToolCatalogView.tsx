@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RefreshCw, Search, ShieldAlert, Check } from "lucide-react";
+import { api } from "../lib/api";
 
 export function ToolCatalogView() {
   const [tools, setTools] = useState<any[]>([]);
@@ -15,7 +16,7 @@ export function ToolCatalogView() {
   async function fetchTools() {
     try {
       setLoading(true);
-      const res = await fetch("/api/tools");
+      const res = await api.get("/api/tools");
       const data = await res.json();
       setTools(data);
     } catch (err) {
@@ -32,9 +33,7 @@ export function ToolCatalogView() {
   async function handleRefresh() {
     try {
       setRefreshing(true);
-      const res = await fetch("/api/tools/refresh", {
-        method: "POST",
-      });
+      const res = await api.post("/api/tools/refresh");
       if (res.ok) {
         fetchTools();
       } else {
@@ -54,11 +53,7 @@ export function ToolCatalogView() {
         prev.map(t => t.toolName === toolName ? { ...t, finalRisk: newRisk } : t)
       );
 
-      const res = await fetch(`/api/tools/${toolName}/risk`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ riskLevel: newRisk }),
-      });
+      const res = await api.patch(`/api/tools/${toolName}/risk`, { riskLevel: newRisk });
 
       if (!res.ok) {
         throw new Error("Failed to save override");

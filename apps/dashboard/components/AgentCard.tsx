@@ -7,6 +7,7 @@ import { PromptInput } from "./PromptInput";
 import { ChatMessage } from "./MessageBubble";
 import { Bot } from "lucide-react";
 import { Terminal, FAQItem } from "./ui/terminal";
+import { api } from "../lib/api";
 
 const agentCommands = [
   "armoriq agent status",
@@ -60,11 +61,7 @@ export function AgentCard() {
 
   const chatMutation = useMutation({
     mutationFn: async (messageText: string) => {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText }),
-      });
+      const res = await api.post("/api/chat", { message: messageText });
       if (!res.ok) {
         throw new Error("API call failed");
       }

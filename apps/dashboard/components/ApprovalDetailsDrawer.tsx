@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { RequestTimeline } from "./RequestTimeline";
 import { sound } from "./SoundSystem";
+import { api } from "../lib/api";
 
 interface ApprovalDetailsDrawerProps {
   approval: any;
@@ -31,7 +32,7 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
     async function fetchLogs() {
       try {
         setLoading(true);
-        const res = await fetch("/api/logs");
+        const res = await api.get("/api/logs");
         if (res.ok) {
           const data = await res.json();
           setLogs(data);
@@ -73,9 +74,7 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
   async function handleResolve(action: "approve" | "reject") {
     try {
       setResolving(true);
-      const res = await fetch(`/api/approvals/${approval.id}/${action}`, {
-        method: "POST",
-      });
+      const res = await api.post(`/api/approvals/${approval.id}/${action}`);
 
       if (res.ok) {
         sound.playSuccess();

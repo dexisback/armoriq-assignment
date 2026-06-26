@@ -10,6 +10,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { ApprovalDetailsDrawer } from "./ApprovalDetailsDrawer";
+import { api } from "../lib/api";
 import { RequestTimeline } from "./RequestTimeline";
 
 function formatToolName(toolName: string): { title: string; category: string } {
@@ -41,7 +42,7 @@ export function AuditLogsView() {
   async function fetchLogs() {
     try {
       setLoading(true);
-      const res = await fetch("/api/logs");
+      const res = await api.get("/api/logs");
       const data = await res.json();
       setLogs(data);
     } catch (err) {

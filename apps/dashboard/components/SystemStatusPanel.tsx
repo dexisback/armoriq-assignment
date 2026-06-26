@@ -12,6 +12,7 @@ import {
   Zap,
   AlertCircle,
 } from "lucide-react";
+import { api } from "../lib/api";
 
 interface SubsystemCardProps {
   name: string;
@@ -101,11 +102,11 @@ export function SystemStatusPanel() {
     queryKey: ["system-health"],
     queryFn: async () => {
       const [healthRes, rulesRes] = await Promise.all([
-        fetch("/api/health").then((r) => {
+        api.get("/api/health").then((r) => {
           if (!r.ok) throw new Error("Health check API failed");
           return r.json();
         }),
-        fetch("/api/rules").then((r) => {
+        api.get("/api/rules").then((r) => {
           if (!r.ok) throw new Error("Rules API failed");
           return r.json();
         }),

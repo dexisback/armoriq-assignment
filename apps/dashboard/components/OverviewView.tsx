@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AgentCard } from "./AgentCard";
 import { RequestTimeline } from "./RequestTimeline";
+import { api } from "../lib/api";
 import {
   Wrench,
   ShieldCheck,
@@ -170,7 +171,7 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
 
   async function fetchData() {
     try {
-      const j = (url: string) => fetch(url).then((r) => r.json());
+      const j = (path: string) => api.get(path).then((r) => r.json());
       const [tools, rules, approvals, logs] = await Promise.all([
         j("/api/tools"),
         j("/api/rules"),

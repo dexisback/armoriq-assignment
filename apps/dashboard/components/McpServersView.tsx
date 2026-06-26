@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Server, RefreshCw, Wrench, ShieldCheck, Terminal, X, Radio, Play, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { api } from "../lib/api";
 
 interface McpServer {
   id: string;
@@ -27,8 +28,8 @@ export function McpServersView({}: McpServersViewProps) {
     queryKey: ["mcp-topology"],
     queryFn: async () => {
       const [healthRes, toolsRes] = await Promise.all([
-        fetch("/api/health").then((r) => r.json()),
-        fetch("/api/tools").then((r) => r.json()),
+        api.get("/api/health").then((r) => r.json()),
+        api.get("/api/tools").then((r) => r.json()),
       ]);
       return { health: healthRes, tools: toolsRes };
     },
@@ -40,9 +41,7 @@ export function McpServersView({}: McpServersViewProps) {
   async function handleRefreshAll() {
     try {
       setRefreshingId("all");
-      const res = await fetch("/api/tools/refresh", {
-        method: "POST",
-      });
+      const res = await api.post("/api/tools/refresh");
       if (res.ok) {
         toast.success("Tool discovery completed successfully.");
         queryClient.invalidateQueries({ queryKey: ["mcp-topology"] });

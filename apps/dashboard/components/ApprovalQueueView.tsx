@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check, X, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { ApprovalDetailsDrawer } from "./ApprovalDetailsDrawer";
+import { api } from "../lib/api";
 
 export function ApprovalQueueView() {
   const [approvals, setApprovals] = useState<any[]>([]);
@@ -15,7 +16,7 @@ export function ApprovalQueueView() {
   async function fetchApprovals() {
     try {
       setLoading(true);
-      const res = await fetch("/api/approvals");
+      const res = await api.get("/api/approvals");
       const data = await res.json();
       setApprovals(data);
     } catch (err) {
@@ -33,9 +34,7 @@ export function ApprovalQueueView() {
     try {
       setResolvingId(id);
 
-      const res = await fetch(`/api/approvals/${id}/${action}`, {
-        method: "POST",
-      });
+      const res = await api.post(`/api/approvals/${id}/${action}`);
 
       if (res.ok) {
         setApprovals((prev) => prev.filter((a) => a.id !== id));
