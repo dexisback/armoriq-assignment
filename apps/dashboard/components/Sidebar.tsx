@@ -6,7 +6,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
-export type TabType = "overview" | "policies" | "catalog" | "approvals" | "logs" | "playground" | "servers" | "demo";
+export type TabType =
+  | "overview"
+  | "policies"
+  | "catalog"
+  | "approvals"
+  | "logs"
+  | "playground"
+  | "servers"
+  | "demo";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -17,88 +25,14 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
-    {
-      id: "overview" as const,
-      label: "Overview",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} />
-          <rect x="9" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} />
-          <rect x="1" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} />
-          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} />
-        </svg>
-      )
-    },
-    {
-      id: "policies" as const,
-      label: "Policies",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <path d="M7.5 1L13 3.5V7.5C13 10.7 10.7 13.3 7.5 14C4.3 13.3 2 10.7 2 7.5V3.5L7.5 1Z" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )
-    },
-    {
-      id: "catalog" as const,
-      label: "Tool Catalog",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <path d="M12.5 5.5L9.5 2.5M10.5 7.5L4.5 13.5M2.5 10.5L1.5 13.5L4.5 12.5" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )
-    },
-    {
-      id: "servers" as const,
-      label: "MCP Servers",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <rect x="2" y="2" width="11" height="4" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4}/>
-          <rect x="2" y="9" width="11" height="4" rx="1" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4}/>
-          <circle cx="5" cy="4" r="0.75" fill="currentColor"/>
-          <circle cx="5" cy="11" r="0.75" fill="currentColor"/>
-        </svg>
-      )
-    },
-    {
-      id: "approvals" as const,
-      label: "Approval Queue",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <rect x="3" y="2" width="9" height="11" rx="1.5" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4}/>
-          <path d="M5.5 6.5L7 8L9.5 5.5" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )
-    },
-    {
-      id: "logs" as const,
-      label: "Audit Logs",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <rect x="2" y="2" width="11" height="11" rx="1.5" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4}/>
-          <path d="M5 5.5H10M5 9.5H8" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round"/>
-        </svg>
-      )
-    },
-    {
-      id: "playground" as const,
-      label: "Prompt Security",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <path d="M7.5 13.5C10.8137 13.5 13.5 10.8137 13.5 7.5C13.5 4.18629 10.8137 1.5 7.5 1.5C4.18629 1.5 1.5 4.18629 1.5 7.5C1.5 10.8137 4.18629 13.5 7.5 13.5Z" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4}/>
-          <path d="M7.5 4.5V8M7.5 10.5H7.51" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round"/>
-        </svg>
-      )
-    },
-    {
-      id: "demo" as const,
-      label: "Demo Guide",
-      icon: (isActive: boolean) => (
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <path d="M7.5 1.5L12.5 4.5V10.5L7.5 13.5L2.5 10.5V4.5L7.5 1.5Z" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M7.5 4.5V8M7.5 10.5H7.51" stroke="currentColor" strokeWidth={isActive ? 1.8 : 1.4} strokeLinecap="round"/>
-        </svg>
-      )
-    },
+    { id: "overview" as const, label: "Overview" },
+    { id: "policies" as const, label: "Policies" },
+    { id: "catalog" as const, label: "Tool Catalog" },
+    { id: "servers" as const, label: "MCP Servers" },
+    { id: "approvals" as const, label: "Approval Queue" },
+    { id: "logs" as const, label: "Audit Logs" },
+    { id: "playground" as const, label: "Prompt Security" },
+    { id: "demo" as const, label: "Demo Guide" },
   ];
 
   const containerVariants = {
@@ -113,7 +47,17 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
 
   const itemVariants = {
     hidden: { opacity: 0, x: -6, filter: "blur(2px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { type: "spring" as const, mass: 1.2, stiffness: 180, damping: 20 } },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring" as const,
+        mass: 1.2,
+        stiffness: 180,
+        damping: 20,
+      },
+    },
   };
 
   return (
@@ -129,12 +73,12 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
         {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
 
-      <div className="h-12 flex items-center px-4 border-b border-border overflow-hidden select-none shrink-0">
-        <div className="flex items-center gap-2.5">
+      <div className="h-14 flex items-center px-4 border-b border-border overflow-hidden select-none shrink-0">
+        <div className="flex items-center gap-3">
           <img
             src="/logo.png"
             alt="ArmorIQ Logo"
-            className="h-6 w-6 object-contain rounded shadow-sm shrink-0"
+            className="h-7 w-7 object-contain rounded shadow-sm shrink-0"
           />
           {!isCollapsed && (
             <motion.div
@@ -142,8 +86,9 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <h1 className="font-bold text-xs tracking-tight text-foreground leading-none">Armoriq</h1>
-              <p className="text-[9px] text-muted-foreground mt-0.5">MCP Guardrail</p>
+              <h1 className="text-base font-medium tracking-tight text-foreground leading-none">
+                ArmorIQ
+              </h1>
             </motion.div>
           )}
         </div>
@@ -153,7 +98,7 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar"
+        className="flex-1 px-3 py-4 space-y-2 overflow-y-auto no-scrollbar"
       >
         {menuItems.map((item, idx) => {
           const isActive = activeTab === item.id;
@@ -164,15 +109,12 @@ export function Sidebar({ activeTab, onChangeTab }: SidebarProps) {
               variants={itemVariants}
               whileTap={{ scale: 0.96 }}
               onClick={() => onChangeTab(item.id)}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium tracking-wide transition-all duration-150 cursor-pointer group relative outline-none ${
+              className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm transition-all duration-180 ease-out cursor-pointer group relative outline-none ${
                 isActive
                   ? "bg-accent text-accent-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
               }`}
             >
-              <div className="flex h-4 w-4 items-center justify-center shrink-0">
-                {item.icon(isActive)}
-              </div>
               {!isCollapsed && (
                 <motion.span
                   initial={{ opacity: 0, x: -8, filter: "blur(1px)" }}

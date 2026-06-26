@@ -247,26 +247,21 @@ export function OverviewView({ onNavigate }: OverviewViewProps) {
           {/* Stat strip — no card borders, just a row of numbers */}
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-0 divide-x divide-border/40 border border-border/40 rounded-xl overflow-hidden bg-card/25">
             {stats.map((s) => {
-              const Icon = s.icon;
               const Tag = s.nav ? "button" : "div";
               return (
                 <Tag
                   key={s.label}
                   onClick={s.nav ? () => onNavigate(s.nav as any) : undefined}
-                  className="group flex flex-col gap-1.5 p-4 text-left hover:bg-muted/20 transition-[background-color,transform] duration-180 ease-out hover:-translate-y-0.5 cursor-pointer"
+                  className="group flex flex-col gap-2 p-4 text-left hover:bg-muted/20 transition-[background-color,transform] duration-180 ease-out hover:-translate-y-0.5 cursor-pointer"
                 >
-                  <Icon
-                    size={11}
-                    className="text-muted-foreground/50 group-hover:text-muted-foreground transition-colors"
-                  />
-                  <span className="text-base font-bold text-foreground font-mono tabular-nums leading-none">
+                  <span className="text-xl font-medium text-foreground font-mono tabular-nums leading-none">
                     {loading ? (
                       <span className="text-muted-foreground/30">—</span>
                     ) : (
                       s.value
                     )}
                   </span>
-                  <span className="text-[9px] text-muted-foreground/50 font-mono uppercase tracking-wide leading-none">
+                  <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wide leading-tight">
                     {s.label}
                   </span>
                 </Tag>

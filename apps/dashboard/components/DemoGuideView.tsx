@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArchitectureOverviewWidget } from "./ArchitectureOverviewWidget";
-import { Shield, ShieldAlert, Cpu, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export function DemoGuideView() {
   const capabilities = [
@@ -10,19 +10,16 @@ export function DemoGuideView() {
       title: "Real-time Interception",
       description:
         "Intercepts incoming tool requests before execution and scans for dangerous command structures.",
-      icon: Shield,
     },
     {
       title: "Risk-based Analysis",
       description:
         "Assigns dynamic risk factors to custom commands to ensure high-risk tasks request manual authorization.",
-      icon: Cpu,
     },
     {
       title: "Prompt Security Playground",
       description:
         "Dedicated playground containing injection scanning heuristics and threat analysis simulation.",
-      icon: ShieldAlert,
     },
   ];
 
@@ -69,24 +66,18 @@ export function DemoGuideView() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {capabilities.map((cap, idx) => {
-              const Icon = cap.icon;
               return (
                 <div
                   key={idx}
-                  className="group p-4 rounded-lg bg-card/60 border border-border flex flex-col gap-3 cursor-pointer"
+                  className="group p-5 rounded-lg bg-card/60 border border-border flex flex-col gap-2 cursor-pointer hover:border-border/80 transition-colors duration-200"
                 >
-                  <div className="p-1.5 w-fit bg-background border border-border rounded-lg text-accent">
-                    <Icon size={14} />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-foreground leading-snug">
-                      {cap.title}
-                    </h4>
-                    <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
-                      <p className="text-[10px] text-muted-foreground leading-normal pt-1.5">
-                        {cap.description}
-                      </p>
-                    </div>
+                  <h4 className="text-sm font-medium text-foreground leading-snug">
+                    {cap.title}
+                  </h4>
+                  <div className="max-h-0 opacity-0 group-hover:max-h-16 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {cap.description}
+                    </p>
                   </div>
                 </div>
               );
