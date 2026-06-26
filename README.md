@@ -10,6 +10,7 @@ Built as part of the ArmorIQ Software Engineer Internship Assignment.
 
 ---
 
+![CI](https://github.com/dexisback/armoriq-assignment/actions/workflows/ci.yml/badge.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![Express](https://img.shields.io/badge/Express-5-lightgrey)
