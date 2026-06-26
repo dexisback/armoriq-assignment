@@ -13,16 +13,21 @@
     "seed": "tsx scripts/seed.ts",
     "test:agent": "tsx scripts/test-agent.ts",
     "dev:agent": "pnpm --filter @armoriq/agent dev",
-    "dev:dashboard": "pnpm --filter dashboard dev"
-    
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/ws": "^8.5.10",
+    "@vitest/coverage-v8": "^2.1.9",
     "concurrently": "^10.0.3",
     "prisma": "^7.8.0",
     "tsx": "^4.20.5",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

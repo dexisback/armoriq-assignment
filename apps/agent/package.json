@@ -5,7 +5,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@armoriq/db": "workspace:*",
@@ -26,6 +29,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "typescript": "^5.8.3"
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
   }
 }

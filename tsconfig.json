@@ -25,5 +25,5 @@
     }
   },
   "include": ["apps/agent/src/**/*.ts", "apps/custom-mcp/src/**/*.ts", "packages/**/*.ts", "prisma/**/*.ts", "scripts/**/*.ts", "*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "**/vitest.config.ts", "**/*.test.ts", "**/*.spec.ts", "coverage"]
 }
