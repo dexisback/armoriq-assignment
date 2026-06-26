@@ -87,6 +87,9 @@ importers:
       ioredis:
         specifier: ^5.11.1
         version: 5.11.1
+      tsx:
+        specifier: ^4.20.5
+        version: 4.22.4
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -94,9 +97,6 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
-      tsx:
-        specifier: ^4.20.5
-        version: 4.22.4
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
