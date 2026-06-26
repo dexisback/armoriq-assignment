@@ -5,15 +5,15 @@
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm -r --parallel dev",
+    "start": "pnpm --filter @armoriq/agent start",
+    "dev": "concurrently \"pnpm dev:agent\" \"pnpm dev:dashboard\"",
     "lint": "pnpm -r lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx scripts/seed.ts",
     "test:agent": "tsx scripts/test-agent.ts",
     "dev:agent": "pnpm --filter @armoriq/agent dev",
-    "dev:dashboard": "pnpm --filter dashboard dev",
-    "dev": "concurrently \"pnpm dev:agent\" \"pnpm dev:dashboard\""
+    "dev:dashboard": "pnpm --filter dashboard dev"
     
   },
   "devDependencies": {
