@@ -20,6 +20,7 @@ export function PoliciesView() {
   const [rules, setRules] = useState<any[]>([]);
   const [tools, setTools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -58,18 +59,36 @@ export function PoliciesView() {
   async function fetchAllData() {
     try {
       setLoading(true);
+      setError(null);
       const [rulesRes, toolsRes] = await Promise.all([
         api.get("/api/rules").then((r) => r.json()),
         api.get("/api/tools").then((r) => r.json()),
       ]);
-      setRules(rulesRes || []);
-      setTools(toolsRes || []);
+      if (!Array.isArray(rulesRes)) {
+        throw new Error(
+          `Expected an array of rules, got: ${typeof rulesRes}`,
+        );
+      }
+      if (!Array.isArray(toolsRes)) {
+        throw new Error(
+          `Expected an array of tools, got: ${typeof toolsRes}`,
+        );
+      }
+      setRules(rulesRes);
+      setTools(toolsRes);
 
-      if (toolsRes && toolsRes.length > 0) {
+      if (toolsRes.length > 0) {
         setSelectedTool(toolsRes[0].toolName);
       }
     } catch (err) {
-      console.error("Failed to load policy data", err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Unknown network error";
+      console.error("Failed to load policy data:", err);
+      setError(message);
+      setRules([]);
+      setTools([]);
     } finally {
       setLoading(false);
     }
@@ -209,11 +228,13 @@ export function PoliciesView() {
       const res = await api.patch(`/api/rules/${rule.id}`, { enabled: updatedEnabled });
 
       if (!res.ok) {
-        throw new Error("Toggle update failed");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Toggle update failed (${res.status})`);
       }
     } catch (err) {
       sound.playError();
-      console.error(err);
+      console.error("Toggle rule failed:", err);
+      setError(err instanceof Error ? err.message : "Toggle update failed");
       fetchAllData();
     }
   }
@@ -222,17 +243,20 @@ export function PoliciesView() {
     if (!confirm("Are you sure you want to delete this rule?")) return;
 
     try {
+      const previous = rules;
       setRules((prev) => prev.filter((r) => r.id !== id));
       sound.playSuccess();
 
       const res = await api.delete(`/api/rules/${id}`);
 
       if (!res.ok) {
-        throw new Error("Delete failed");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Delete failed (${res.status})`);
       }
     } catch (err) {
       sound.playError();
-      console.error(err);
+      console.error("Delete rule failed:", err);
+      setError(err instanceof Error ? err.message : "Delete failed");
       fetchAllData();
     }
   }
@@ -262,15 +286,20 @@ export function PoliciesView() {
       if (res.ok) {
         sound.playSuccess();
         setIsModalOpen(false);
-        fetchAllData();
+        await fetchAllData();
       } else {
+        const body = await res.json().catch(() => ({}));
+        const msg = body.error || `Request failed (${res.status})`;
         sound.playError();
-        const data = await res.json();
-        alert(data.error || "Request failed");
+        setError(msg);
+        console.error("Save rule failed:", msg);
       }
     } catch (err) {
       sound.playError();
-      alert("Network request error");
+      const msg =
+        err instanceof Error ? err.message : "Network request error";
+      console.error("Save rule network error:", err);
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -283,7 +312,7 @@ export function PoliciesView() {
     }));
   }
 
-  if (loading && rules.length === 0) {
+  if (loading && rules.length === 0 && !error) {
     return (
       <div className="space-y-6 animate-pulse select-none">
         <div className="flex justify-between items-center">
@@ -313,6 +342,28 @@ export function PoliciesView() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error && rules.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-16 rounded-lg border border-rose-500/30 bg-rose-500/5">
+          <Shield className="mx-auto text-rose-500 mb-3" size={24} />
+          <h3 className="text-sm font-semibold text-foreground">
+            Failed to load policies
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto font-mono">
+            {error}
+          </p>
+          <button
+            onClick={fetchAllData}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-medium cursor-pointer transition-[background-color,transform] duration-200 ease-out active:scale-[0.96]"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

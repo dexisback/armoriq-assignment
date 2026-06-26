@@ -9,17 +9,41 @@ import {
   policyEngine,
 } from "@armoriq/policy-engine";
 import { registry } from "@armoriq/mcp-registry";
+import { prisma } from "@armoriq/db";
 
 import { ruleCache } from "../rule-cache.service.js";
 
 import { chatService } from "./chat.service.js";
+
+import type { RiskLevel } from "@armoriq/shared-types";
+
+async function resolveEffectiveRisk(
+  toolName: string,
+  registryRisk: RiskLevel
+): Promise<RiskLevel> {
+  try {
+    const override =
+      await prisma.toolRiskOverride.findUnique(
+        {
+          where: { toolName },
+        }
+      );
+    return (
+      (override?.riskLevel as RiskLevel) ??
+      registryRisk
+    );
+  } catch {
+    return registryRisk;
+  }
+}
 
 import { toolAdapterService } from "./tool-adapter.service.js";
 import { approvalService } from "../approval.service.js";
 
 export class ToolLoopService {
   async run(
-    prompt: string
+    prompt: string,
+    conversationId: string = "default"
   ): Promise<string> {
       const scan = promptSecurityService.scan(prompt)
       if(scan.suspicious){
@@ -31,6 +55,7 @@ export class ToolLoopService {
             ", "
           ),
           trace: scan,
+          conversationId,
         })
       }
 
@@ -87,10 +112,16 @@ export class ToolLoopService {
         );
       }
 
+      const effectiveRisk =
+        await resolveEffectiveRisk(
+          functionCall.name,
+          tool.riskLevel
+        );
+
       const decision =
         await policyEngine.evaluate(
           {
-            conversationId: "default",
+            conversationId,
             toolName:
               functionCall.name,
 
@@ -103,9 +134,16 @@ export class ToolLoopService {
 
           {
             riskLevel:
-              tool.riskLevel,
+              effectiveRisk,
           }
         );
+
+        console.log(
+"Policy:",
+decision.decision,
+decision.reason,
+decision.matchedRule
+);
         console.log(
   "POLICY DECISION:",
   decision
@@ -119,7 +157,7 @@ export class ToolLoopService {
           reason: decision.reason,
           matchedRule: decision.matchedRule,
           riskLevel: tool.riskLevel,
-          conversationId: "default",
+          conversationId,
         });
 
         const approval = await approvalService.create(
@@ -136,7 +174,7 @@ export class ToolLoopService {
           reason: decision.reason,
           matchedRule: decision.matchedRule,
           riskLevel: tool.riskLevel,
-          conversationId: "default",
+          conversationId,
         });
 
         return `Approval required. Approval ID: ${approval.id}`;
@@ -151,7 +189,7 @@ export class ToolLoopService {
           reason: decision.reason,
           matchedRule: decision.matchedRule,
           riskLevel: tool.riskLevel,
-          conversationId: "default",
+          conversationId,
         });
         return `Tool blocked: ${decision.reason}`;
       }
@@ -171,7 +209,7 @@ export class ToolLoopService {
         reason: decision.reason,
         matchedRule: decision.matchedRule,
         riskLevel: tool.riskLevel,
-        conversationId: "default",
+        conversationId,
       });
 
       response =

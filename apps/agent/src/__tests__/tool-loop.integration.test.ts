@@ -3,11 +3,12 @@ import type { DiscoveredTool, Rule, ToolExecutionResponse } from "@armoriq/share
 
 // ---------- Mocks for external / DB boundaries ----------
 
-const { logCreateMock, approvalCreateMock, generateMock, executeToolMock } = vi.hoisted(() => ({
+const { logCreateMock, approvalCreateMock, generateMock, executeToolMock, riskOverrideFindUnique } = vi.hoisted(() => ({
   logCreateMock: vi.fn(),
   approvalCreateMock: vi.fn(),
   generateMock: vi.fn(),
   executeToolMock: vi.fn(),
+  riskOverrideFindUnique: vi.fn(),
 }));
 
 vi.mock("../services/agent-services/chat.service.js", () => ({
@@ -48,6 +49,15 @@ vi.mock("@armoriq/mcp-registry", () => {
     },
   };
 });
+
+// Mock @armoriq/db to provide toolRiskOverride for the risk resolver.
+vi.mock("@armoriq/db", () => ({
+  prisma: {
+    toolRiskOverride: {
+      findUnique: riskOverrideFindUnique,
+    },
+  },
+}));
 
 // Import AFTER mocks are registered.
 import { toolLoopService } from "../services/agent-services/tool-loop.service.js";
@@ -93,6 +103,7 @@ beforeEach(() => {
   approvalCreateMock.mockReset();
   generateMock.mockReset();
   executeToolMock.mockReset();
+  riskOverrideFindUnique.mockReset();
   ruleCache.clear();
   executeToolMock.mockResolvedValue({
     success: true,
@@ -237,5 +248,60 @@ describe("ToolLoop — prompt injection", () => {
       ([e]: any) => e.eventType === "PROMPT_INJECTION"
     );
     expect(injectionCall).toBeUndefined();
+  });
+});
+
+// ====================================================================
+// 5. RISK OVERRIDE
+// ====================================================================
+
+describe("ToolLoop — risk override", () => {
+  it("uses the override risk level when one exists, even if registry risk differs", async () => {
+    // Registry says CRITICAL, but an override says MEDIUM.
+    // A RISK_BASED rule that triggers on MEDIUM should fire.
+    seedTool(makeTool("deploy_release", "CRITICAL"));
+    riskOverrideFindUnique.mockResolvedValue({
+      toolName: "deploy_release",
+      riskLevel: "MEDIUM",
+    });
+    const rules: Rule[] = [
+      { type: "RISK_BASED", riskLevel: "MEDIUM", name: "med-approval" },
+    ];
+    ruleCache.setRules(rules);
+    logCreateMock.mockResolvedValue({ id: "log-1" });
+    approvalCreateMock.mockResolvedValue({
+      id: "approval-1",
+      toolName: "deploy_release",
+      arguments: {},
+      status: "PENDING",
+    });
+    generateMock.mockResolvedValueOnce(toolCallResponse("deploy_release"));
+
+    const result = await toolLoopService.run("Deploy v2");
+
+    // The MEDIUM override should trigger the RISK_BASED rule
+    // which produces REQUIRE_APPROVAL.
+    expect(result).toContain("Approval required");
+    expect(riskOverrideFindUnique).toHaveBeenCalledWith({
+      where: { toolName: "deploy_release" },
+    });
+    expect(executeToolMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to registry risk when no override exists", async () => {
+    seedTool(makeTool("list_servers", "LOW"));
+    riskOverrideFindUnique.mockResolvedValue(null);
+    ruleCache.setRules([]);
+    logCreateMock.mockResolvedValue({ id: "log-1" });
+    generateMock
+      .mockResolvedValueOnce(toolCallResponse("list_servers"))
+      .mockResolvedValueOnce(finalTextResponse("done"));
+
+    const result = await toolLoopService.run("List servers");
+
+    expect(result).toBe("done");
+    expect(riskOverrideFindUnique).toHaveBeenCalledWith({
+      where: { toolName: "list_servers" },
+    });
   });
 });

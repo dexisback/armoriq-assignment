@@ -47,19 +47,29 @@ export function ToolCatalogView() {
   }
 
   async function handleOverrideRisk(toolName: string, newRisk: string) {
+    const previous = tools.find(
+      (t) => t.toolName === toolName,
+    )?.finalRisk;
     try {
       // Optimistic update
-      setTools(prev => 
-        prev.map(t => t.toolName === toolName ? { ...t, finalRisk: newRisk } : t)
+      setTools(prev =>
+        prev.map(t => t.toolName === toolName ? { ...t, finalRisk: newRisk, overridden: true } : t)
       );
 
       const res = await api.patch(`/api/tools/${toolName}/risk`, { riskLevel: newRisk });
 
       if (!res.ok) {
-        throw new Error("Failed to save override");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Save failed (${res.status})`);
       }
     } catch (err) {
-      fetchTools();
+      // Rollback optimistic update
+      setTools(prev =>
+        prev.map(t => t.toolName === toolName ? { ...t, finalRisk: previous ?? t.finalRisk } : t)
+      );
+      const msg = err instanceof Error ? err.message : "Save failed";
+      console.error("Risk override failed:", err);
+      setError(msg);
     }
   }
 
