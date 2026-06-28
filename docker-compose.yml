@@ -30,3 +30,24 @@ services:
       - "3000:3000"
     depends_on:
       - agent
+
+  # Local keep-alive ping for the agent. Only useful if Render's free-tier
+  # idle timeout ever applied to a self-hosted container, but it also doubles
+  # as a "smoke test every 10 min" so you notice immediately if /health regresses.
+  # No-op when AGENT_URL points at localhost.
+  keepalive:
+    image: curlimages/curl:8.10.1
+    container_name: armoriq-keepalive
+    restart: unless-stopped
+    depends_on:
+      agent:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          curl -fsS -m 10 "$${AGENT_URL:-http://agent:4000}/api/health" || echo "[keepalive] ping failed at $$(date -u)";
+          sleep 300;
+        done
+    environment:
+      AGENT_URL: http://agent:4000

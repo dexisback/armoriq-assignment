@@ -1,0 +1,53 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    # Render's free tier spins down services after ~15 minutes of inactivity.
+    # Hitting /health every 5 minutes keeps the service warm and avoids cold starts.
+    # Schedule is in UTC.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping agent health endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Hit /health
+        id: health
+        env:
+          AGENT_URL: ${{ vars.AGENT_URL || 'https://armoriq-assignment-6sbz.onrender.com' }}
+        run: |
+          set -euo pipefail
+          url="${AGENT_URL%/}/api/health"
+          echo "Pinging ${url}"
+          # -f: fail on HTTP >= 400
+          # --retry 3: retry transient network failures
+          # --retry-delay 5: 5s between retries
+          # --max-time 15: hard cap per attempt
+          http_code=$(curl -sS -o /tmp/health.json -w "%{http_code}" \
+            --retry 3 --retry-delay 5 --max-time 15 \
+            "${url}" || echo "000")
+          echo "HTTP ${http_code}"
+          if [ "${http_code}" != "200" ]; then
+            echo "::error::Agent health check failed with HTTP ${http_code}"
+            echo "Response body:"
+            cat /tmp/health.json || true
+            exit 1
+          fi
+          echo "Response body:"
+          cat /tmp/health.json
+
+      - name: Wake-up GET on root (extra nudge)
+        env:
+          AGENT_URL: ${{ vars.AGENT_URL || 'https://armoriq-assignment-6sbz.onrender.com' }}
+        run: |
+          # Some Render configs only treat the *first* request as the wake-up.
+          # An additional cheap GET on the root path helps ensure the container
+          # is fully out of the suspended state.
+          url="${AGENT_URL%/}/"
+          echo "Nudging ${url}"
+          curl -sS -o /dev/null -w "HTTP %{http_code}\n" \
+            --max-time 15 "${url}" || true

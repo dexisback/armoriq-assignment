@@ -556,6 +556,23 @@ docker compose down --rmi all && docker compose up --build
 
 ---
 
+## Keep-Alive (Preventing Render Cold Starts)
+
+The agent is hosted on Render's free tier, which spins a service down after ~15 minutes of inactivity. To avoid cold starts, the repo ships a scheduled GitHub Actions workflow that pings the public `/api/health` endpoint every 10 minutes.
+
+| File | What it does |
+|------|--------------|
+| `.github/workflows/keep-alive.yml` | Cron `*/5 * * * *` (UTC) that curls the agent's `/api/health` and a follow-up root GET. Fails the run on non-200, so you get an alert in the Actions tab if the backend ever goes down. |
+| `docker-compose.yml` → `keepalive` | Local sidecar (curlimages/curl) that pings `http://agent:4000/api/health` every 5 minutes. Useful as a passive smoke test. |
+
+You can override the target by setting a repo variable:
+
+- **Settings → Secrets and variables → Actions → Variables → `AGENT_URL`** = `https://armoriq-assignment-6sbz.onrender.com`
+
+The default in the workflow already points at that URL, so no config is required for it to work out of the box. You can also trigger it manually with `workflow_dispatch` from the Actions tab.
+
+---
+
 ## Verifying the Installation
 
 After the development servers have started successfully:
