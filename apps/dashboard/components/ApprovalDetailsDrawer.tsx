@@ -33,7 +33,7 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
 
   if (!approval) return null;
 
-  const matchedLog = logs.find((l) => l.trace?.approvalId === approval.id);
+  const matchedLog = logs.find((l: any) => l.trace?.approvalId === approval.id);
   const riskLevel = matchedLog?.riskLevel || "MEDIUM";
   const matchedRule = matchedLog?.trace?.matchedRule || "Approval Required";
   const reason = matchedLog?.reason || "Approval required";
