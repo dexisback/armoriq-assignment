@@ -9,7 +9,7 @@ export const logRouter =
 logRouter.get(
   "/logs",
   async (req, res) => {
-    const { approvalId } = req.query;
+    const approvalId = req.query.approvalId as string | undefined;
 
     const logs = approvalId
       ? await prisma.toolExecutionLog.findMany({
