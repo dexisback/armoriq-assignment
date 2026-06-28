@@ -12,33 +12,57 @@ jobs:
   ping:
     name: Ping agent health endpoint
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    # Render cold starts can take 30-60s for the first request after a sleep.
+    # Give the job plenty of headroom; a successful keep-alive still finishes
+    # in well under 10s, so a long timeout only ever matters on the rare wake-up.
+    timeout-minutes: 5
+
+    # Always succeed at the workflow level — keep-alive is best-effort.
+    # We surface failures via ::warning:: so they still show up in the UI
+    # but don't page anyone with a red ❌ for a normal cold start.
+    continue-on-error: true
 
     steps:
-      - name: Hit /health
+      - name: Hit /api/health
         id: health
         env:
           AGENT_URL: ${{ vars.AGENT_URL || 'https://armoriq-assignment-6sbz.onrender.com' }}
         run: |
-          set -euo pipefail
           url="${AGENT_URL%/}/api/health"
           echo "Pinging ${url}"
-          # -f: fail on HTTP >= 400
-          # --retry 3: retry transient network failures
-          # --retry-delay 5: 5s between retries
-          # --max-time 15: hard cap per attempt
+
+          # No `set -e` here on purpose: a non-200 is *expected* during cold start
+          # and we want to record the status, not abort the script.
+          # - --max-time 90: cold start can take 30-60s
+          # - --retry 2 --retry-all-errors: retry on any failure (curl <8.10
+          #   only retries transient errors; --retry-all-errors covers the rest)
+          # - --retry-delay 10: give Render time to spin the container back up
+          # - --retry-connrefused: in case the port isn't listening yet
           http_code=$(curl -sS -o /tmp/health.json -w "%{http_code}" \
-            --retry 3 --retry-delay 5 --max-time 15 \
-            "${url}" || echo "000")
+            --max-time 90 \
+            --retry 2 \
+            --retry-all-errors \
+            --retry-delay 10 \
+            --retry-connrefused \
+            "${url}" 2>/tmp/health.err) || http_code="000"
+
           echo "HTTP ${http_code}"
-          if [ "${http_code}" != "200" ]; then
-            echo "::error::Agent health check failed with HTTP ${http_code}"
-            echo "Response body:"
-            cat /tmp/health.json || true
-            exit 1
+          echo "--- response body ---"
+          cat /tmp/health.json 2>/dev/null || echo "(no body)"
+          echo "--- curl stderr ---"
+          cat /tmp/health.err 2>/dev/null || true
+          echo "---------------------"
+
+          if [ "${http_code}" = "200" ]; then
+            echo "::notice::Agent is healthy."
+          else
+            # Don't fail the job (continue-on-error handles that) — but make
+            # the failure loud so it shows up in the Actions UI.
+            echo "::warning::Agent health check returned HTTP ${http_code}"
           fi
-          echo "Response body:"
-          cat /tmp/health.json
+
+          # Always exit 0; continue-on-error is belt-and-suspenders.
+          exit 0
 
       - name: Wake-up GET on root (extra nudge)
         env:
@@ -50,4 +74,4 @@ jobs:
           url="${AGENT_URL%/}/"
           echo "Nudging ${url}"
           curl -sS -o /dev/null -w "HTTP %{http_code}\n" \
-            --max-time 15 "${url}" || true
+            --max-time 30 "${url}" 2>/dev/null || echo "(root nudge failed, ignoring)"
