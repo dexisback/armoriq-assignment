@@ -8,16 +8,24 @@ export const logRouter =
 
 logRouter.get(
   "/logs",
-  async (_req, res) => {
-    const logs =
-      await prisma.toolExecutionLog.findMany({
-        orderBy: {
-          createdAt:
-            "desc",
-        },
+  async (req, res) => {
+    const { approvalId } = req.query;
 
-        take: 100,
-      });
+    const logs = approvalId
+      ? await prisma.toolExecutionLog.findMany({
+          where: {
+            trace: {
+              path: ["approvalId"],
+              string_contains: approvalId,
+            },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        })
+      : await prisma.toolExecutionLog.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 100,
+        });
 
     res.json(logs);
   }

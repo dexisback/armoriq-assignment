@@ -1,79 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, Search, ShieldAlert, Check } from "lucide-react";
 import { api } from "../lib/api";
+import { queryFns, getQueryKeys, STALE_TIMES } from "../lib/queries";
 
 export function ToolCatalogView() {
-  const [tools, setTools] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
+  const keys = getQueryKeys();
+
+  const toolsQuery = useQuery({
+    queryKey: keys.tools,
+    queryFn: queryFns.tools,
+    staleTime: STALE_TIMES.tools,
+  });
+
+  const tools = Array.isArray(toolsQuery.data) ? toolsQuery.data : [];
+  const loading = toolsQuery.isLoading && tools.length === 0;
+  const error = toolsQuery.error ? (toolsQuery.error as Error).message : "";
+
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const riskLevels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
-  async function fetchTools() {
-    try {
-      setLoading(true);
-      const res = await api.get("/api/tools");
-      const data = await res.json();
-      setTools(data);
-    } catch (err) {
-      setError("Failed to fetch tool catalog");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchTools();
-  }, []);
+  const overrideMutation = useMutation({
+    mutationFn: async ({ toolName, riskLevel }: { toolName: string; riskLevel: string }) => {
+      const res = await api.patch(`/api/tools/${toolName}/risk`, { riskLevel });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Save failed (${res.status})`);
+      }
+    },
+    onMutate: async ({ toolName, riskLevel }) => {
+      await queryClient.cancelQueries({ queryKey: keys.tools });
+      const prev = queryClient.getQueryData<any[]>(keys.tools);
+      queryClient.setQueryData(keys.tools, (old: any[] | undefined) =>
+        old?.map((t) =>
+          t.toolName === toolName ? { ...t, finalRisk: riskLevel, overridden: true } : t,
+        ),
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(keys.tools, ctx.prev);
+    },
+  });
 
   async function handleRefresh() {
     try {
       setRefreshing(true);
       const res = await api.post("/api/tools/refresh");
       if (res.ok) {
-        fetchTools();
+        queryClient.invalidateQueries({ queryKey: keys.tools });
+        queryClient.invalidateQueries({ queryKey: keys.topology });
+        queryClient.invalidateQueries({ queryKey: keys.system });
       } else {
-        alert("Failed to refresh catalog");
+        console.error("Failed to refresh catalog");
       }
     } catch (err) {
-      alert("Error refreshing catalog");
+      console.error("Error refreshing catalog");
     } finally {
       setRefreshing(false);
     }
   }
 
-  async function handleOverrideRisk(toolName: string, newRisk: string) {
-    const previous = tools.find(
-      (t) => t.toolName === toolName,
-    )?.finalRisk;
-    try {
-      // Optimistic update
-      setTools(prev =>
-        prev.map(t => t.toolName === toolName ? { ...t, finalRisk: newRisk, overridden: true } : t)
-      );
-
-      const res = await api.patch(`/api/tools/${toolName}/risk`, { riskLevel: newRisk });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `Save failed (${res.status})`);
-      }
-    } catch (err) {
-      // Rollback optimistic update
-      setTools(prev =>
-        prev.map(t => t.toolName === toolName ? { ...t, finalRisk: previous ?? t.finalRisk } : t)
-      );
-      const msg = err instanceof Error ? err.message : "Save failed";
-      console.error("Risk override failed:", err);
-      setError(msg);
-    }
-  }
-
-  const filteredTools = tools.filter(tool => 
+  const filteredTools = tools.filter((tool: any) =>
     tool.toolName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.serverId.toLowerCase().includes(searchQuery.toLowerCase())
@@ -89,7 +82,7 @@ export function ToolCatalogView() {
     }
   }
 
-  if (loading && tools.length === 0) {
+  if (loading) {
     return (
       <div className="space-y-6 animate-pulse select-none">
         <div className="flex justify-between items-center">
@@ -175,7 +168,7 @@ export function ToolCatalogView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredTools.map((tool) => (
+              {filteredTools.map((tool: any) => (
                 <tr key={tool.id} className="hover:bg-muted/15 transition-colors align-top">
                   <td className="p-4">
                     <span className="font-bold text-foreground">{tool.toolName}</span>
@@ -196,7 +189,7 @@ export function ToolCatalogView() {
                   <td className="p-4 text-center">
                     <select
                       value={tool.finalRisk}
-                      onChange={(e) => handleOverrideRisk(tool.toolName, e.target.value)}
+                      onChange={(e) => overrideMutation.mutate({ toolName: tool.toolName, riskLevel: e.target.value })}
                       className={`text-[10px] font-semibold uppercase tracking-wide bg-transparent focus:outline-none cursor-pointer ${getRiskTextColor(tool.finalRisk)}`}
                     >
                       {riskLevels.map((lvl) => (

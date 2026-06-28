@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X, Copy, Check, Terminal, MessageSquare, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { RequestTimeline } from "./RequestTimeline";
 import { sound } from "./SoundSystem";
 import { api } from "../lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 interface ApprovalDetailsDrawerProps {
   approval: any;
@@ -15,38 +16,20 @@ interface ApprovalDetailsDrawerProps {
 }
 
 export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: ApprovalDetailsDrawerProps) {
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [resolving, setResolving] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
   const [copiedArgs, setCopiedArgs] = useState(false);
 
-  useEffect(() => {
-    sound.playModalOpen();
-    return () => {
-      sound.playModalClose();
-    };
-  }, []);
-
-  useEffect(() => {
-    async function fetchLogs() {
-      try {
-        setLoading(true);
-        const res = await api.get("/api/logs");
-        if (res.ok) {
-          const data = await res.json();
-          setLogs(data);
-        }
-      } catch (err) {
-        toast.error("Failed to load audit logs context");
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (approval?.id) {
-      fetchLogs();
-    }
-  }, [approval?.id]);
+  const { data: logs = [], isLoading: logsLoading } = useQuery({
+    queryKey: ["logs", approval?.id],
+    queryFn: () =>
+      api.get(`/api/logs?approvalId=${approval.id}`).then((r) => {
+        if (!r.ok) throw new Error("Failed to load logs");
+        return r.json();
+      }),
+    enabled: !!approval?.id,
+    staleTime: 30_000,
+  });
 
   if (!approval) return null;
 
@@ -156,7 +139,7 @@ export function ApprovalDetailsDrawer({ approval, onClose, onSuccess }: Approval
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {loading ? (
+            {logsLoading ? (
               <div className="space-y-6 animate-pulse">
                 <div className="h-20 bg-muted rounded-2xl" />
                 <div className="h-24 bg-muted rounded-2xl" />

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Shield } from "lucide-react";
 import { api } from "../lib/api";
+import { queryFns, getQueryKeys, STALE_TIMES } from "../lib/queries";
 import {
   ToggleOn,
   ToggleOff,
@@ -17,10 +19,26 @@ import {
 import { sound } from "./SoundSystem";
 
 export function PoliciesView() {
-  const [rules, setRules] = useState<any[]>([]);
-  const [tools, setTools] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const keys = getQueryKeys();
+
+  const rulesQuery = useQuery({
+    queryKey: keys.rules,
+    queryFn: queryFns.rules,
+    staleTime: STALE_TIMES.rules,
+  });
+
+  const toolsQuery = useQuery({
+    queryKey: keys.tools,
+    queryFn: queryFns.tools,
+    staleTime: STALE_TIMES.tools,
+  });
+
+  const rules = Array.isArray(rulesQuery.data) ? rulesQuery.data : [];
+  const tools = Array.isArray(toolsQuery.data) ? toolsQuery.data : [];
+  const loading = rulesQuery.isLoading || toolsQuery.isLoading;
+  const error = rulesQuery.error || toolsQuery.error;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -38,12 +56,10 @@ export function PoliciesView() {
   }, [isModalOpen, hasMounted]);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
-  // Collapsed rule JSON states
   const [expandedRuleIds, setExpandedRuleIds] = useState<
     Record<string, boolean>
   >({});
 
-  // Form states
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("BLOCK_TOOL");
@@ -56,47 +72,11 @@ export function PoliciesView() {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  async function fetchAllData() {
-    try {
-      setLoading(true);
-      setError(null);
-      const [rulesRes, toolsRes] = await Promise.all([
-        api.get("/api/rules").then((r) => r.json()),
-        api.get("/api/tools").then((r) => r.json()),
-      ]);
-      if (!Array.isArray(rulesRes)) {
-        throw new Error(
-          `Expected an array of rules, got: ${typeof rulesRes}`,
-        );
-      }
-      if (!Array.isArray(toolsRes)) {
-        throw new Error(
-          `Expected an array of tools, got: ${typeof toolsRes}`,
-        );
-      }
-      setRules(rulesRes);
-      setTools(toolsRes);
-
-      if (toolsRes.length > 0) {
-        setSelectedTool(toolsRes[0].toolName);
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Unknown network error";
-      console.error("Failed to load policy data:", err);
-      setError(message);
-      setRules([]);
-      setTools([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (tools.length > 0 && !selectedTool) {
+      setSelectedTool(tools[0].toolName);
+    }
+  }, [type, tools, selectedTool]);
 
   useEffect(() => {
     const handleOpenModal = () => {
@@ -108,12 +88,57 @@ export function PoliciesView() {
     };
   }, [tools]);
 
-  // Update default tools selection if rules type is changed
   useEffect(() => {
     if (tools.length > 0 && !selectedTool) {
       setSelectedTool(tools[0].toolName);
     }
   }, [type, tools, selectedTool]);
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      const res = await api.patch(`/api/rules/${id}`, { enabled });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Toggle update failed (${res.status})`);
+      }
+      return res.json();
+    },
+    onMutate: async ({ id, enabled }) => {
+      queryClient.setQueryData(keys.rules, (prev: any[] | undefined) =>
+        prev?.map((r) => (r.id === id ? { ...r, enabled } : r)),
+      );
+    },
+    onError: () => {
+      sound.playError();
+      queryClient.invalidateQueries({ queryKey: keys.rules });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.system });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.delete(`/api/rules/${id}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Delete failed (${res.status})`);
+      }
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: keys.rules });
+      queryClient.setQueryData(keys.rules, (prev: any[] | undefined) =>
+        prev?.filter((r) => r.id !== id),
+      );
+    },
+    onError: () => {
+      sound.playError();
+      queryClient.invalidateQueries({ queryKey: keys.rules });
+    },
+    onSuccess: () => {
+      sound.playSuccess();
+    },
+  });
 
   function getGeneratedConfig() {
     switch (type) {
@@ -212,53 +237,18 @@ export function PoliciesView() {
   }
 
   async function handleToggleRule(rule: any) {
-    try {
-      const updatedEnabled = !rule.enabled;
-      if (updatedEnabled) {
-        sound.playToggleOn();
-      } else {
-        sound.playToggleOff();
-      }
-      setRules((prev) =>
-        prev.map((r) =>
-          r.id === rule.id ? { ...r, enabled: updatedEnabled } : r,
-        ),
-      );
-
-      const res = await api.patch(`/api/rules/${rule.id}`, { enabled: updatedEnabled });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `Toggle update failed (${res.status})`);
-      }
-    } catch (err) {
-      sound.playError();
-      console.error("Toggle rule failed:", err);
-      setError(err instanceof Error ? err.message : "Toggle update failed");
-      fetchAllData();
+    const updatedEnabled = !rule.enabled;
+    if (updatedEnabled) {
+      sound.playToggleOn();
+    } else {
+      sound.playToggleOff();
     }
+    toggleMutation.mutate({ id: rule.id, enabled: updatedEnabled });
   }
 
   async function handleDeleteRule(id: string) {
     if (!confirm("Are you sure you want to delete this rule?")) return;
-
-    try {
-      const previous = rules;
-      setRules((prev) => prev.filter((r) => r.id !== id));
-      sound.playSuccess();
-
-      const res = await api.delete(`/api/rules/${id}`);
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `Delete failed (${res.status})`);
-      }
-    } catch (err) {
-      sound.playError();
-      console.error("Delete rule failed:", err);
-      setError(err instanceof Error ? err.message : "Delete failed");
-      fetchAllData();
-    }
+    deleteMutation.mutate(id);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -286,20 +276,19 @@ export function PoliciesView() {
       if (res.ok) {
         sound.playSuccess();
         setIsModalOpen(false);
-        await fetchAllData();
+        queryClient.invalidateQueries({ queryKey: keys.rules });
+        if (editingRuleId) {
+          queryClient.invalidateQueries({ queryKey: keys.system });
+        }
       } else {
         const body = await res.json().catch(() => ({}));
         const msg = body.error || `Request failed (${res.status})`;
         sound.playError();
-        setError(msg);
         console.error("Save rule failed:", msg);
       }
     } catch (err) {
       sound.playError();
-      const msg =
-        err instanceof Error ? err.message : "Network request error";
       console.error("Save rule network error:", err);
-      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -356,10 +345,10 @@ export function PoliciesView() {
             Failed to load policies
           </h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto font-mono">
-            {error}
+            {error instanceof Error ? error.message : "Unknown error"}
           </p>
           <button
-            onClick={fetchAllData}
+            onClick={() => queryClient.invalidateQueries({ queryKey: keys.rules })}
             className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted/40 rounded-xl text-xs font-medium cursor-pointer transition-[background-color,transform] duration-200 ease-out active:scale-[0.96]"
           >
             Retry
@@ -444,7 +433,6 @@ export function PoliciesView() {
                       </div>
                     )}
 
-                    {/* Summary Parameters Block (Redesigned Human-Readable UX) */}
                     <div
                       className="mt-3 bg-background/50 border border-border/70 rounded-xl p-3.5 max-w-2xl shadow-sm"
                       style={{
@@ -564,7 +552,6 @@ export function PoliciesView() {
                       </div>
                     </div>
 
-                    {/* Advanced Collapsible Mode */}
                     <div className="mt-3">
                       <button
                         onClick={() => toggleExpandRuleJson(rule.id)}
@@ -712,7 +699,6 @@ export function PoliciesView() {
                 </div>
               </div>
 
-              {/* DYNAMIC FIELD SECTIONS */}
               {(type === "BLOCK_TOOL" ||
                 type === "REQUIRE_APPROVAL" ||
                 type === "INPUT_VALIDATION") && (
@@ -801,7 +787,6 @@ export function PoliciesView() {
                 </div>
               )}
 
-              {/* HUMAN READABLE PREVIEW PANEL */}
               <div
                 className="p-3 bg-muted/40 border border-border/70 rounded-xl shadow-sm"
                 style={{ boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.03)" }}
@@ -814,7 +799,6 @@ export function PoliciesView() {
                 </p>
               </div>
 
-              {/* ADVANCED COLLAPSIBLE MODE FOR PREVIEWING GENERATED JSON */}
               <div className="pt-1">
                 <button
                   type="button"

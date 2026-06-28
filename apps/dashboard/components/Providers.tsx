@@ -10,6 +10,8 @@ export function Providers({ children }: { children: ReactNode }) {
       queries: {
         refetchOnWindowFocus: false,
         retry: false,
+        staleTime: 15_000,
+        gcTime: 60_000,
       },
     },
   }));

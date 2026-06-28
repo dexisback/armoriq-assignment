@@ -56,11 +56,11 @@ toolRouter.get(
 toolRouter.post(
   "/tools/refresh",
   async (_req, res) => {
-    for (const server of MCP_SERVERS) {
-      await registry.refreshServer(
-        server.id
-      );
-    }
+    await Promise.all(
+      MCP_SERVERS.map((server) =>
+        registry.refreshServer(server.id)
+      )
+    );
 
     await toolCatalogService.sync(
       registry.getTools()
@@ -68,10 +68,7 @@ toolRouter.post(
 
     return res.json({
       success: true,
-
-      tools:
-        registry.getTools()
-          .length,
+      tools: registry.getTools().length,
     });
   }
 );

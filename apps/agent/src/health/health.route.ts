@@ -1,9 +1,9 @@
 import { registry } from "@armoriq/mcp-registry";
 import { prisma } from "@armoriq/db";
 import { Router } from "express";
-import { Redis } from "ioredis";
 import { MODELS, DEFAULT_PROVIDER, FALLBACK_PROVIDER } from "../lib/models.js";
 import { MCP_SERVERS } from "../config/mcp-servers.js";
+import { getRedis } from "../lib/redis.js";
 
 export const healthRouter = Router();
 
@@ -11,26 +11,16 @@ healthRouter.get(
   "/health",
   async (_req, res) => {
     let database = "healthy";
-
     try {
-      await prisma.$queryRaw`
-        SELECT 1
-      `;
+      await prisma.$queryRaw`SELECT 1`;
     } catch {
       database = "unhealthy";
     }
 
     let redis = "healthy";
     try {
-      const client = new Redis(process.env.REDIS_URL!, {
-        maxRetriesPerRequest: 0,
-        connectTimeout: 500,
-      });
-      const pong = await client.ping();
-      if (pong !== "PONG") {
-        redis = "unhealthy";
-      }
-      await client.quit();
+      const pong = await getRedis().ping();
+      if (pong !== "PONG") redis = "unhealthy";
     } catch {
       redis = "unhealthy";
     }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AgentCard } from "./AgentCard";
 import { RequestTimeline } from "./RequestTimeline";
-import { api } from "../lib/api";
+import { queryFns, getQueryKeys } from "../lib/queries";
 import {
   Wrench,
   ShieldCheck,
@@ -156,52 +157,47 @@ function formatToolLabel(name: string) {
 }
 
 export function OverviewView({ onNavigate }: OverviewViewProps) {
-  const [metrics, setMetrics] = useState({
-    toolsCount: 0,
-    rulesCount: 0,
-    approvalsCount: 0,
-    logsCount: 0,
-    blockedCount: 0,
+  const keys = getQueryKeys();
+
+  const { data: tools = [], isLoading: toolsLoading } = useQuery({
+    queryKey: keys.tools,
+    queryFn: queryFns.tools,
+    refetchInterval: 30_000,
   });
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
-  const [allLogs, setAllLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: rules = [], isLoading: rulesLoading } = useQuery({
+    queryKey: keys.rules,
+    queryFn: queryFns.rules,
+    refetchInterval: 30_000,
+  });
+  const { data: approvals = [], isLoading: approvalsLoading } = useQuery({
+    queryKey: keys.approvals,
+    queryFn: queryFns.approvals,
+    refetchInterval: 15_000,
+  });
+  const { data: logs = [], isLoading: logsLoading } = useQuery({
+    queryKey: keys.logs,
+    queryFn: queryFns.logs,
+    refetchInterval: 10_000,
+  });
+
+  const loading = toolsLoading || rulesLoading || approvalsLoading || logsLoading;
+
+  const metrics = {
+    toolsCount: tools.length || 0,
+    rulesCount: rules.filter((r: any) => r.enabled).length || 0,
+    approvalsCount: approvals.length || 0,
+    logsCount: logs.length || 0,
+    blockedCount:
+      logs.filter(
+        (l: any) =>
+          l.decision === "DENY" || l.decision === "VALIDATION_FAILED",
+      ).length || 0,
+  };
+
+  const recentLogs = logs.slice(0, 8);
+  const allLogs = logs;
   const [helpOpen, setHelpOpen] = useState(false);
   const [activityHelpOpen, setActivityHelpOpen] = useState(false);
-
-  async function fetchData() {
-    try {
-      const j = (path: string) => api.get(path).then((r) => r.json());
-      const [tools, rules, approvals, logs] = await Promise.all([
-        j("/api/tools"),
-        j("/api/rules"),
-        j("/api/approvals"),
-        j("/api/logs"),
-      ]);
-      setMetrics({
-        toolsCount: tools.length || 0,
-        rulesCount: rules.filter((r: any) => r.enabled).length || 0,
-        approvalsCount: approvals.length || 0,
-        logsCount: logs.length || 0,
-        blockedCount:
-          logs.filter(
-            (l: any) =>
-              l.decision === "DENY" || l.decision === "VALIDATION_FAILED",
-          ).length || 0,
-      });
-      setRecentLogs(logs.slice(0, 8));
-      setAllLogs(logs);
-    } catch {
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-    const t = setInterval(fetchData, 5000);
-    return () => clearInterval(t);
-  }, []);
 
   const stats = [
     {
