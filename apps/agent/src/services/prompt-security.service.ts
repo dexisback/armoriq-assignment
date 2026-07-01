@@ -6,15 +6,22 @@ const SUSPICIOUS_PATTERNS = [
   "ignore the system prompt",
   "override policy",
   "bypass security",
+  "bypass all safety",
+  "bypass all restrictions",
   "disable guardrails",
   "jailbreak",
   "act as root",
   "you are root",
+  "pretend you are system",
+  "pretend you are admin",
 
   // privilege escalation
   "sudo",
   "root access",
   "administrator privileges",
+  "escalate privileges",
+  "reset permissions",
+  "reset all permissions",
 
   // destructive intent
   "delete all files",
@@ -30,10 +37,16 @@ const SUSPICIOUS_PATTERNS = [
   // exfiltration
   "reveal secrets",
   "reveal api key",
+  "reveal hidden",
+  "reveal password",
+  "reveal prompt",
   "system prompt",
   "hidden instructions",
+  "hidden prompt",
   "developer message",
-  "show hidden prompt"
+  "show hidden prompt",
+  "what is the system prompt",
+  "what is your prompt",
 ];
 
 export interface PromptScanResult {
@@ -42,28 +55,19 @@ export interface PromptScanResult {
 }
 
 export class PromptSecurityService {
-  scan(
-    prompt: string
-  ): PromptScanResult {
-    const normalized =
-      prompt.toLowerCase();
+  scan(prompt: string): PromptScanResult {
+    const normalized = prompt.toLowerCase();
 
-    const matchedPatterns =
-      SUSPICIOUS_PATTERNS.filter(
-        pattern =>
-          normalized.includes(
-            pattern
-          )
-      );
+    const matchedPatterns = SUSPICIOUS_PATTERNS.filter((pattern) =>
+      normalized.includes(pattern),
+    );
 
     return {
-      suspicious:
-        matchedPatterns.length > 0,
+      suspicious: matchedPatterns.length > 0,
 
       matchedPatterns,
     };
   }
 }
 
-export const promptSecurityService =
-  new PromptSecurityService();
+export const promptSecurityService = new PromptSecurityService();
